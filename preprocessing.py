@@ -2,45 +2,83 @@ import os
 from PIL import Image
 import numpy as np
 
-i = 0
-
-img_arrays = []
-x_shapes = []
-y_shapes = []
 data_path = 'C:/Users/cpgaf/PycharmProjects/zillow_scraper'
-for file in os.listdir(data_path + '/imgs'):
-    if i % 100 == 0:
-        print('iteration {}'.format(i))
-    try:
-        img = Image.open(data_path + '/imgs/' + file)
-    except OSError:
-        print('file unreadable')
-        continue
-    data = np.array(img)
-    '''if data.shape[0] != 300:
-        back = Image.fromarray(data, 'RGB')
-        back.show()
-        exit()'''
-    if data.shape != (300, 300, 3): #skip if improper shape. most are 300 x 300
-        continue
-    x_shapes.append(data.shape[0])
-    y_shapes.append(data.shape[0])
-    img_arrays.append(data)
-    i += 1
 
-imgs = np.zeros((len(img_arrays), 300, 300, 3))
-for i in range(len(img_arrays)):
-    imgs[i] = img_arrays[i]
+def process_data_batch(batchnum, filenames, text_data, numeric_data):
+    i = 0
+    img_arrays = []
+    x_shapes = []
+    y_shapes = []
+    zpid_list = {}
 
-mean_img = np.mean(imgs, axis=0)
+    for file in filenames:
+        if i % 100 == 0:
+            print('iteration {}'.format(i))
+        try:
+            img = Image.open(data_path + '/imgs/' + file)
+        except OSError:
+            print('file unreadable')
+            continue
+        data = np.array(img)
+        if data.shape != (300, 400, 3):  # skip if improper shape. most are 300 x 300
+            continue
+        zpid = file[:-4]
+        if zpid in text_data.keys() and zpid in numeric_data.keys():
+            zpid_list[zpid] = i
+        else:
+            continue
+        x_shapes.append(data.shape[0])
+        y_shapes.append(data.shape[1])
+        img_arrays.append(data)
+        i += 1
 
-with open('xout.txt', 'w') as of:
-    for x in x_shapes:
-        of.write('{}\n'.format(x))
-with open('yout.txt', 'w') as of:
-    for y in y_shapes:
-        of.write('{}\n'.format(y))
+    N = len(set(text_data.keys()) & set(numeric_data.keys()) & set(zpid_list.keys()))
+    print('N is {}'.format(N))
+    assert(N == len(img_arrays))
+
+    ordered_descriptions = [''] * N
+    ordered_addresses = [''] * N
+    ordered_numeric_data = np.zeros((N, 4))
+    for zpid in zpid_list.keys():
+        index = zpid_list[zpid]
+        ordered_descriptions[index] = text_data[zpid][0]
+        ordered_addresses[index] = text_data[zpid][1]
+        ordered_numeric_data[index] = numeric_data[zpid]
+
+    imgs = np.zeros((N, 300, 400, 3))
+    for i in range(N):
+        imgs[i] = img_arrays[i]
+
+    mean_img = np.mean(imgs, axis=0)
+    np.save('img_data{}.npy'.format(batchnum), imgs)
+    np.save('numeric_data{}.npy'.format(batchnum), ordered_numeric_data)
+
+    with open('descriptions{}.txt'.format(batchnum), 'w') as of:
+        for y in ordered_descriptions:
+            of.write('{}\n'.format(repr(y)))
+    with open('addresses{}.txt'.format(batchnum), 'w') as of:
+        for y in ordered_addresses:
+            of.write('{}\n'.format(repr(y[1:-1])))
 
 
+def main():
+    numeric_data = {}
+    text_data = {}
+    with open('C:/Users/cpgaf/PycharmProjects/zillow_scraper/scraped_data.csv') as f:
+        lines = f.readlines()
+        lines = lines[1:]
+        for line in lines:
+            sp = line.split(';,.')
+            zpid, zip, price, beds, baths, descr, address = sp
+            numeric_data[zpid] = (zip, beds, baths, price)
+            text_data[zpid] = (descr, address)
 
+    index = 0
+    batch_size = 1000
+    files = os.listdir(data_path + '/imgs')
+    while len(files) != 0:
+        process_data_batch(index, files[:batch_size], text_data, numeric_data)
+        files = files[batch_size:]
+        index += 1
 
+main()
