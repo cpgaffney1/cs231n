@@ -3,6 +3,7 @@ from threading import Thread
 from keras.models import Sequential
 from sklearn import linear_model as sklm
 import util
+from model import build_model, Config
 
 num_data_files = 50
 n_epochs = 10
@@ -10,8 +11,12 @@ n_epochs = 10
 def main():
     print()
     ## run param search and other stuff
-    x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
-    reg = linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
+    #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
+    #reg = linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
+
+    config = Config()
+    model = build_model(config)
+    train_model(model)
 
 
 def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
@@ -19,7 +24,7 @@ def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
     reg.fit(x_train, y_train)
     return reg
 
-def build_train_model(config):
+def train_model(model):
     global loaded_img_data
     global loaded_numeric_data
 
@@ -28,27 +33,23 @@ def build_train_model(config):
     img_data = loaded_img_data.copy()
     numeric_data = loaded_numeric_data.copy()
 
-    # build model
-    print()
-
-    data_indices = np.random.shuffle(list(range(num_data_files)))
+    data_indices = np.asarray(list(range(num_data_files)))
+    np.random.shuffle(data_indices)
     #training loop
     for _ in range(n_epochs):
         for index in data_indices:
             #start loading data
-            data_thread = Thread(target=load_data_batch, args=(index,))
-            data_thread.start()
+            #data_thread = Thread(target=load_data_batch, args=(index,))
+            #data_thread.start()
 
             # fit model on data batch
-
+            model.fit([numeric_data[:400, 1:3], img_data[:400, :, :, :]], numeric_data[:400, 3], batch_size=32, validation_split=0.1)
 
             #retrieve new data
-            data_thread.join()
-            img_data = loaded_img_data.copy()
-            numeric_data = loaded_numeric_data.copy()
+            #data_thread.join()
+            #img_data = loaded_img_data.copy()
+            #numeric_data = loaded_numeric_data.copy()
 
-def build_model(config):
-    model = Sequential()
 
 loaded_img_data = None
 loaded_numeric_data = None
