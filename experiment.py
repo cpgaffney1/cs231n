@@ -31,6 +31,9 @@ def linear_regression():
     reg.fit(x_train, y_train)
 
 
+
+
+
     print()
     print('Model weights')
 
