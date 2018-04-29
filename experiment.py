@@ -9,33 +9,14 @@ n_epochs = 10
 def main():
     print()
     ## run param search and other stuff
-    linear_regression()
+    x_train, y_train, x_dev, y_dev, x_test, y_test = load_for_lin_reg()
+    reg = linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
 
-def linear_regression():
-    with open('C:/Users/cpgaf/PycharmProjects/zillow_scraper/scraped_data.csv') as f:
-        lines = f.readlines()
-        lines = lines[1:]
-        X = np.zeros((len(lines), 2))
-        y = np.zeros(len(lines))
-        for i, line in enumerate(lines):
-            sp = line.split(';,.')
-            zpid, zip, price, beds, baths, descr, address = sp
-            X[i][0] = int(beds)
-            X[i][1] = int(baths)
-            y[i] = float(price)
 
-    X, y = shuffle_in_parallel(X, y)
-    x_train, y_train, x_dev, y_dev, x_test, y_test = split_data(X, y)
-
-    reg = sklm.LogisticRegression()
+def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
+    reg = sklm.LinearRegression()
     reg.fit(x_train, y_train)
-
-
-
-
-
-    print()
-    print('Model weights')
+    return reg
 
 def build_train_model(config):
     global loaded_img_data
@@ -102,5 +83,23 @@ def split_data(x, y):
     return x_train, y_train, x_dev, y_dev, x_test, y_test
 
 
+def load_for_lin_reg():
+    with open('scraped_data.csv') as f:
+        lines = f.readlines()
+        lines = lines[1:]
+        X = np.zeros((len(lines), 2))
+        y = np.zeros(len(lines))
+        for i, line in enumerate(lines):
+            sp = line.split(';,.')
+            zpid, zip, price, beds, baths, descr, address = sp
+            X[i][0] = int(beds)
+            X[i][1] = int(baths)
+            y[i] = float(price)
+
+    X, y = shuffle_in_parallel(X, y)
+    x_train, y_train, x_dev, y_dev, x_test, y_test = split_data(X, y)
+    return x_train, y_train, x_dev, y_dev, x_test, y_test
+
 if __name__ == "__main__":
     main()
+
