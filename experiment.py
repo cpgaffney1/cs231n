@@ -29,6 +29,8 @@ def linear_regression():
 
     reg = sklm.LogisticRegression()
     reg.fit(x_train, y_train)
+
+
     print()
     print('Model weights')
 
