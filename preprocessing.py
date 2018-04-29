@@ -50,13 +50,13 @@ def process_data_batch(batchnum, filenames, text_data, numeric_data):
         imgs[i] = img_arrays[i]
 
     mean_img = np.mean(imgs, axis=0)
-    np.save('img_data{}.npy'.format(batchnum), imgs)
-    np.save('numeric_data{}.npy'.format(batchnum), ordered_numeric_data)
+    np.save('data/img_data{}.npy'.format(batchnum), imgs)
+    np.save('data/numeric_data{}.npy'.format(batchnum), ordered_numeric_data)
 
-    with open('descriptions{}.txt'.format(batchnum), 'w') as of:
+    with open('data/descriptions{}.txt'.format(batchnum), 'w') as of:
         for y in ordered_descriptions:
             of.write('{}\n'.format(repr(y)))
-    with open('addresses{}.txt'.format(batchnum), 'w') as of:
+    with open('data/addresses{}.txt'.format(batchnum), 'w') as of:
         for y in ordered_addresses:
             of.write('{}\n'.format(repr(y[1:-1])))
 
