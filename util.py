@@ -47,3 +47,9 @@ def crop(image, shape=(299, 299, 3)):
     for i in range(len(image.shape)):
         assert(image.shape[i] < shape[i])
     new_img[:,:,:] =
+
+def buckets(x, num):
+    bins = np.linspace(0,np.max(x), num=num)
+    print(bins)
+    y = np.digitize(x,bins, right=True)
+    return y
