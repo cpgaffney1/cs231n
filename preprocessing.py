@@ -110,7 +110,7 @@ def process_data_batch(filenames, text_data, numeric_data):
 def load_tabular_data():
     numeric_data = {}
     text_data = {}
-    with open('tabular_data/scraped_data.csv') as f:
+    with open('tabular_data/scraped_data.csv',encoding='utf8',errors='replace') as f:
         lines = f.readlines()
         lines = lines[1:]
         for line in lines:
