@@ -1,3 +1,5 @@
+import numpy as np
+
 def shuffle_in_parallel(arr1, arr2):
     assert(len(arr1) == len(arr2))
     indices = np.arange(len(arr1))
@@ -24,7 +26,7 @@ def split_data(x, y):
 
 
 def load_for_lin_reg():
-    with open('scraped_data.csv') as f:
+    with open('tabular_data/scraped_data.csv') as f:
         lines = f.readlines()
         lines = lines[1:]
         X = np.zeros((len(lines), 2))
@@ -39,3 +41,9 @@ def load_for_lin_reg():
     X, y = shuffle_in_parallel(X, y)
     x_train, y_train, x_dev, y_dev, x_test, y_test = split_data(X, y)
     return x_train, y_train, x_dev, y_dev, x_test, y_test
+
+def crop(image, shape=(299, 299, 3)):
+    new_img = np.zeros((shape[0], shape[1], shape[2]))
+    for i in range(len(image.shape)):
+        assert(image.shape[i] < shape[i])
+    new_img[:,:,:] =

@@ -2,7 +2,6 @@ import os
 from PIL import Image
 import numpy as np
 
-data_path = 'C:/Users/cpgaf/PycharmProjects/zillow_scraper'
 
 def process_data_batch(batchnum, filenames, text_data, numeric_data):
     i = 0
@@ -15,7 +14,7 @@ def process_data_batch(batchnum, filenames, text_data, numeric_data):
         if i % 100 == 0:
             print('iteration {}'.format(i))
         try:
-            img = Image.open(data_path + '/imgs/' + file)
+            img = Image.open('imgs/' + file)
         except OSError:
             print('file unreadable')
             continue
@@ -64,7 +63,7 @@ def process_data_batch(batchnum, filenames, text_data, numeric_data):
 def main():
     numeric_data = {}
     text_data = {}
-    with open('C:/Users/cpgaf/PycharmProjects/zillow_scraper/scraped_data.csv') as f:
+    with open('tabular_data/scraped_data.csv') as f:
         lines = f.readlines()
         lines = lines[1:]
         for line in lines:
@@ -75,7 +74,7 @@ def main():
 
     index = 0
     batch_size = 1000
-    files = os.listdir(data_path + '/imgs')
+    files = os.listdir('imgs/')
     while len(files) != 0:
         process_data_batch(index, files[:batch_size], text_data, numeric_data)
         files = files[batch_size:]
