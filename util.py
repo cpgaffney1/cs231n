@@ -52,7 +52,7 @@ def crop(image, shape=(299, 299, 3)):
     new_img[:,:,:] = image[:shape[0], :shape[1], :]
     return new_img
 
-def buckets(x, num):
+def buckets(x, num=1000):
     bins = np.linspace(0,np.max(x), num=num)
     print(bins)
     y = np.digitize(x,bins, right=True)
