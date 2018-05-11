@@ -48,7 +48,7 @@ def train_model(model):
             #data_thread.start()
 
             # fit model on data batch
-            model.fit([numeric_data[:200, 1:3], img_data[:400, :, :, :]], numeric_data[:200, 3], batch_size=32, validation_split=0.1)
+            model.fit([numeric_data[:200, 1:3], img_data[:200, :, :, :]], numeric_data[:200, 3], batch_size=32, validation_split=0.1)
 
             #retrieve new data
             #data_thread.join()

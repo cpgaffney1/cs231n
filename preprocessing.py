@@ -69,7 +69,7 @@ def process_data_batch(filenames, text_data, numeric_data):
     print('Processing data batch')
     for file in filenames:
         if i % 100 == 0:
-            print('reading image #'.format(i))
+            print('reading image #{}'.format(i))
         try:
             img = Image.open('imgs/' + file)
         except OSError:
