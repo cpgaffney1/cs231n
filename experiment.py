@@ -4,6 +4,8 @@ from keras.models import Sequential
 from sklearn import linear_model as sklm
 import util
 from model import build_model, Config
+import os
+import preprocessing
 
 num_data_files = 50
 n_epochs = 10
@@ -28,8 +30,10 @@ def train_model(model):
     global loaded_img_data
     global loaded_numeric_data
 
+    img_files = os.listdir('imgs/')
+
     #load initial data
-    load_data_batch(0)
+    load_data_batch(img_files)
     img_data = loaded_img_data.copy()
     numeric_data = loaded_numeric_data.copy()
 
@@ -39,7 +43,7 @@ def train_model(model):
     for _ in range(n_epochs):
         for index in data_indices:
             #start loading data
-            #data_thread = Thread(target=load_data_batch, args=(index,))
+            #data_thread = Thread(target=load_data_batch, args=(img_files,))
             #data_thread.start()
 
             # fit model on data batch
@@ -53,11 +57,16 @@ def train_model(model):
 
 loaded_img_data = None
 loaded_numeric_data = None
-def load_data_batch(index):
+def load_data_batch(img_files, batch_size=1000):
     global loaded_img_data
     global loaded_numeric_data
-    loaded_img_data = np.load('data/img_data{}.npy'.format(index))
-    loaded_numeric_data = np.load('data/numeric_data{}.npy'.format(index))
+    numeric_data, text_data = preprocessing.load_tabular_data()
+    imgs, numeric_data, descriptions, addresses= \
+        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size), text_data, numeric_data)
+    loaded_img_data = imgs
+    loaded_numeric_data = numeric_data
+    #loaded_img_data = np.load('data/img_data{}.npy'.format(index))
+    #loaded_numeric_data = np.load('data/numeric_data{}.npy'.format(index))
 
 
 

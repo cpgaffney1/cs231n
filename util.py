@@ -45,8 +45,12 @@ def load_for_lin_reg():
 def crop(image, shape=(299, 299, 3)):
     new_img = np.zeros((shape[0], shape[1], shape[2]))
     for i in range(len(image.shape)):
-        assert(image.shape[i] < shape[i])
-    new_img[:,:,:] =
+        assert(image.shape[i] >= shape[i])
+    '''new_img[:,:,:] = image[(image.shape[0] - shape[0])//2 : (image.shape[0] - shape[0])//2 + shape[0],
+                     (image.shape[1] - shape[1]) // 2: (image.shape[1] - shape[1]) // 2 + shape[1],
+                     :]'''
+    new_img[:,:,:] = image[:shape[0], :shape[1], :]
+    return new_img
 
 def buckets(x, num):
     bins = np.linspace(0,np.max(x), num=num)

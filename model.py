@@ -7,7 +7,7 @@ img_shape = (300, 400, 3)
 
 class Config:
     numeric_h_size = 10
-
+    img_shape = (299,299,3)
     def __init__(self):
         pass
 
