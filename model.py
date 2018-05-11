@@ -35,7 +35,7 @@ def build_model(config):
     x = Dense(64, activation='relu')(x)
     x = Dense(64, activation='relu')(x)
 
-    #Output Layer
+    #Output Layer #Check if linear is a valid activation
     predictions = Dense(1, activation='linear', name='main_output')(x)
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
