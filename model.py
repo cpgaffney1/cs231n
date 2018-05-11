@@ -29,11 +29,16 @@ def build_model(config):
     # to top layer of text network
 
     #concat them
-    x = keras.layers.concatente([cnn_])
-    c1 = concatenate([n_final, i_final])
-    c2 = Dense(64, activation='relu')(c1)
-    predictions = Dense(1)(c2)
+    x = concatenate([cnn_out, fc_out])#, rnn_out])
 
-    model = Model(inputs=(numeric_inputs, img_inputs), outputs=predictions)
-    model.compile(optimizer='adam', loss='mean_squared_error')
+    #Final Fc
+    x = Dense(64, activation='relu')(x)
+    x = Dense(64, activation='relu')(x)
+
+    #Output Layer
+    predictions = Dense(1, activation='linear', name='main_output')(x)
+
+    #Define Model 3 inputs and 1 output (Missing Rnn Input)
+    model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
+    model.compile(optimizer='adam', loss='sparse_crossentropy')
     return model
