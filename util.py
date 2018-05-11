@@ -54,6 +54,5 @@ def crop(image, shape=(299, 299, 3)):
 
 def buckets(x, num=1000):
     bins = np.linspace(0,np.max(x), num=num)
-    print(bins)
     y = np.digitize(x,bins, right=True)
     return y
