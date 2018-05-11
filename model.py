@@ -3,7 +3,7 @@ from keras.models import Model
 from keras.applications.xception import Xception
 
 numeric_input_size = 2
-img_shape = (300, 400, 3)
+img_shape = (299, 299, 3)
 
 class Config:
     numeric_h_size = 10
@@ -18,6 +18,11 @@ def build_model(config):
     #running cnn
     cnn_out = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
                                          pooling=None, classes=1000)(img_inputs)
+    cnn_out = Flatten()(cnn_out)
+    x = Dense(128, activation='relu')(cnn_out)
+    x = Dense(64, activation='relu')(x)
+    cnn_out = Dense(64, activation='relu')(x)
+
     #running fc
     x = Dense(64, activation='relu')(numeric_inputs)
     x = Dense(64, activation='relu')(x)
@@ -40,5 +45,5 @@ def build_model(config):
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
-    model.compile(optimizer='adam', loss='sparse_crossentropy')
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
     return model

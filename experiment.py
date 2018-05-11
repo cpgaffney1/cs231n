@@ -40,14 +40,15 @@ def train_model(model):
     data_indices = np.asarray(list(range(num_data_files)))
     np.random.shuffle(data_indices)
     #training loop
-    for _ in range(n_epochs):
+    for epoch in range(n_epochs):
         for index in data_indices:
+            print('Fitting, epoch: {}'.format(epoch))
             #start loading data
             #data_thread = Thread(target=load_data_batch, args=(img_files,))
             #data_thread.start()
 
             # fit model on data batch
-            model.fit([numeric_data[:400, 1:3], img_data[:400, :, :, :]], numeric_data[:400, 3], batch_size=32, validation_split=0.1)
+            model.fit([numeric_data[:200, 1:3], img_data[:400, :, :, :]], numeric_data[:200, 3], batch_size=32, validation_split=0.1)
 
             #retrieve new data
             #data_thread.join()

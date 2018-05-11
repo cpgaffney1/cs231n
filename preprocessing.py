@@ -66,10 +66,10 @@ def process_data_batch(filenames, text_data, numeric_data):
     x_shapes = []
     y_shapes = []
     zpid_list = {}
-
+    print('Processing data batch')
     for file in filenames:
         if i % 100 == 0:
-            print('iteration {}'.format(i))
+            print('reading image #'.format(i))
         try:
             img = Image.open('imgs/' + file)
         except OSError:
