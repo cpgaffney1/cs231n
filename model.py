@@ -2,6 +2,7 @@ from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
+from keras.optimizers import Adam
 
 class Config:
     numeric_input_size = 2
@@ -22,7 +23,7 @@ def build_model(config):
                         input_tensor=img_inputs, classes=config.n_classes)
     #freeze lower layers
     for layer in image_model.layers:
-        layer.trainable = False
+        layer.trainable = True
 
     cnn_out = image_model(img_inputs)
     cnn_out = Flatten()(cnn_out)
@@ -52,5 +53,6 @@ def build_model(config):
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy', 'top_k_categorical_accuracy'])
+    opt = Adam(lr=0.0001)
+    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['accuracy', 'top_k_categorical_accuracy'])
     return model
