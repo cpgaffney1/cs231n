@@ -43,7 +43,7 @@ def load_for_lin_reg():
     return x_train, y_train, x_dev, y_dev, x_test, y_test
 
 def crop(image, shape=(299, 299), random=False):
-    for i in range(len(image.shape)):
+    for i in range(len(shape)):
         assert(image.shape[i] >= shape[i])
     new_img = np.zeros((shape[0], shape[1], 3))
     if random:

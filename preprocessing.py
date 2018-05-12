@@ -10,8 +10,6 @@ def process_data_batch_and_write(batchnum, filenames, text_data, numeric_data):
     x_shapes = []
     y_shapes = []
     zpid_list = {}
-    sys.stdout.write('<')
-    sys.stdout.flush()
     for file in filenames:
         if i % 100 == 0:
             sys.stdout.write('=')
@@ -73,9 +71,12 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
     zpid_list = {}
     print('Processing data batch')
     count = 0
+    sys.stdout.write('<')
+    sys.stdout.flush()
     for file in filenames:
         if count % 100 == 0:
-            print('reading image #{}'.format(count))
+            sys.stdout.write('=')
+            sys.stdout.flush()
         count += 1
         try:
             img = Image.open('imgs/' + file)
@@ -95,6 +96,9 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
         y_shapes.append(data.shape[1])
         img_arrays.append(data)
         i += 1
+
+    sys.stdout.write('>\n')
+    sys.stdout.flush()
 
     N = len(img_arrays)
     print('N is {}'.format(N))
