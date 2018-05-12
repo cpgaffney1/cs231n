@@ -1,4 +1,6 @@
 import numpy as np
+from PIL import Image
+
 
 def shuffle_in_parallel(arr1, arr2):
     assert(len(arr1) == len(arr2))
@@ -43,16 +45,16 @@ def load_for_lin_reg():
     return x_train, y_train, x_dev, y_dev, x_test, y_test
 
 def crop(image, shape=(299, 299), random=False):
-    for i in range(len(shape)):
+    '''for i in range(len(shape)):
         assert(image.shape[i] >= shape[i])
     new_img = np.zeros((shape[0], shape[1], 3))
     if random:
         start = (np.random.randint(0, image.shape[0] - shape[0]), np.random.randint(0, image.shape[1] - shape[1]))
     else:
         start = ((image.shape[0] - shape[0])//2, (image.shape[1] - shape[1]) // 2)
-    #new_img[:,:,:] = image[start[0]:start[0]+shape[0], start[1]:start[1]+shape[1], :]
-    new_img[:,:,:] = image[:shape[0], :shape[1], :]
-
+    new_img[:,:,:] = image[start[0]:start[0]+shape[0], start[1]:start[1]+shape[1], :]'''
+    new_img = image[:shape[0], :shape[1], :]
+    assert(new_img.shape[0] == shape[0] and new_img.shape[1] == shape[1])
     return new_img
 
 def buckets(x, num=1000):

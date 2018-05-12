@@ -16,10 +16,15 @@ def build_model(config):
     img_inputs = Input(shape=config.img_shape)
 
     #running cnn
-    #cnn_out = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
-    #                                     pooling=None, classes=config.n_classes)(img_inputs)
-    cnn_out = MobileNet(input_shape=config.img_shape, include_top=False, weights='imagenet',
-                        input_tensor=img_inputs, classes=config.n_classes)(img_inputs)
+    #image_model = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
+    #                                     pooling=None, classes=config.n_classes)
+    image_model = MobileNet(input_shape=config.img_shape, include_top=False, weights='imagenet',
+                        input_tensor=img_inputs, classes=config.n_classes)
+    #freeze lower layers
+    for layer in image_model.layers:
+        layer.trainable = False
+
+    cnn_out = image_model(img_inputs)
     cnn_out = Flatten()(cnn_out)
     x = Dense(128, activation='relu')(cnn_out)
     x = Dense(64, activation='relu')(x)
