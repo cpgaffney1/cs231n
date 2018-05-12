@@ -50,7 +50,7 @@ def train_model(model, config):
             # fit model on data batch
             model.fit([numeric_data[:200, 1:3], img_data[:200, :, :, :]],
                       util.buckets(numeric_data[:200, 3], num=config.n_classes),
-                      batch_size=config.batch_size, validation_split=0.1)
+                      batch_size=config.batch_size, validation_split=0.1, epochs=1000)
 
             #retrieve new data
             #data_thread.join()
