@@ -2,22 +2,21 @@ from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate
 from keras.models import Model
 from keras.applications.xception import Xception
 
-numeric_input_size = 2
-img_shape = (299, 299, 3)
-
 class Config:
-    numeric_h_size = 10
+    numeric_input_size = 2
     img_shape = (299,299,3)
+    n_classes = 1000
+    batch_size = 32
     def __init__(self):
         pass
 
 def build_model(config):
-    numeric_inputs = Input(shape=(numeric_input_size,))
-    img_inputs = Input(shape=img_shape)
+    numeric_inputs = Input(shape=(config.numeric_input_size,))
+    img_inputs = Input(shape=config.img_shape)
 
     #running cnn
     cnn_out = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
-                                         pooling=None, classes=1000)(img_inputs)
+                                         pooling=None, classes=config.n_classes)(img_inputs)
     cnn_out = Flatten()(cnn_out)
     x = Dense(128, activation='relu')(cnn_out)
     x = Dense(64, activation='relu')(x)
@@ -41,9 +40,9 @@ def build_model(config):
     x = Dense(64, activation='relu')(x)
 
     #Output Layer #Check if linear is a valid activation
-    predictions = Dense(1000, activation='linear', name='main_output')(x)
+    predictions = Dense(config.n_classes, activation='linear', name='main_output')(x)
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy')
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy', 'top_k_categorical_accuracy'])
     return model

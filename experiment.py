@@ -18,7 +18,7 @@ def main():
 
     config = Config()
     model = build_model(config)
-    train_model(model)
+    train_model(model, config)
 
 
 def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
@@ -26,7 +26,7 @@ def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
     reg.fit(x_train, y_train)
     return reg
 
-def train_model(model):
+def train_model(model, config):
     global loaded_img_data
     global loaded_numeric_data
 
@@ -48,7 +48,9 @@ def train_model(model):
             #data_thread.start()
 
             # fit model on data batch
-            model.fit([numeric_data[:200, 1:3], img_data[:200, :, :, :]], util.buckets(numeric_data[:200, 3]), batch_size=32, validation_split=0.1)
+            model.fit([numeric_data[:200, 1:3], img_data[:200, :, :, :]],
+                      util.buckets(numeric_data[:200, 3], num=config.n_classes),
+                      batch_size=config.batch_size, validation_split=0.1)
 
             #retrieve new data
             #data_thread.join()
