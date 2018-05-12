@@ -33,7 +33,7 @@ def train_model(model, config):
     img_files = os.listdir('imgs/')
 
     #load initial data
-    load_data_batch(img_files)
+    load_data_batch(img_files, img_shape=config.img_shape)
     img_data = loaded_img_data.copy()
     numeric_data = loaded_numeric_data.copy()
 
@@ -60,12 +60,12 @@ def train_model(model, config):
 
 loaded_img_data = None
 loaded_numeric_data = None
-def load_data_batch(img_files, batch_size=1000):
+def load_data_batch(img_files, img_shape=(299,299,3), batch_size=1000):
     global loaded_img_data
     global loaded_numeric_data
     numeric_data, text_data = preprocessing.load_tabular_data()
     imgs, numeric_data, descriptions, addresses= \
-        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size), text_data, numeric_data)
+        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size), text_data, numeric_data, desired_shape=img_shape)
     loaded_img_data = imgs
     loaded_numeric_data = numeric_data
     #loaded_img_data = np.load('data/img_data{}.npy'.format(index))
