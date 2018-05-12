@@ -53,6 +53,6 @@ def build_model(config):
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
-    opt = Adam(lr=0.0001)
-    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['accuracy', 'top_k_categorical_accuracy'])
+    opt = Adam(lr=0.00001)
+    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
     return model
