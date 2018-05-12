@@ -19,7 +19,7 @@ def build_model(config):
     #cnn_out = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
     #                                     pooling=None, classes=config.n_classes)(img_inputs)
     cnn_out = MobileNet(input_shape=config.img_shape, include_top=False, weights='imagenet',
-                        input_tensor=img_inputs, classes=config.n_classes)
+                        input_tensor=img_inputs, classes=config.n_classes)(img_inputs)
     cnn_out = Flatten()(cnn_out)
     x = Dense(128, activation='relu')(cnn_out)
     x = Dense(64, activation='relu')(x)
