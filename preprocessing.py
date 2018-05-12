@@ -84,8 +84,8 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
             print('file unreadable')
             continue
         data = np.array(img)
-        if data.shape[0] < desired_shape[0] or data.shape[1] < desired_shape[1]:
-            # skip if improper shape. most are 400 x 300
+        if  data.shape != (300, 400, 3):
+            # skip if improper shape. most are 300 x 400
             continue
         zpid = file[:-4]
         if zpid in text_data.keys() and zpid in numeric_data.keys():
