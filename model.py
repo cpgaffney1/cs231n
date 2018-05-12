@@ -1,10 +1,11 @@
 from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate
 from keras.models import Model
 from keras.applications.xception import Xception
+from keras.applications.mobilenet import MobileNet
 
 class Config:
     numeric_input_size = 2
-    img_shape = (299,299,3)
+    img_shape = (224,224,3)
     n_classes = 1000
     batch_size = 32
     def __init__(self):
@@ -15,8 +16,10 @@ def build_model(config):
     img_inputs = Input(shape=config.img_shape)
 
     #running cnn
-    cnn_out = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
-                                         pooling=None, classes=config.n_classes)(img_inputs)
+    #cnn_out = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
+    #                                     pooling=None, classes=config.n_classes)(img_inputs)
+    cnn_out = MobileNet(input_shape=config.img_shape, include_top=False, weights='imagenet',
+                        input_tensor=img_inputs, classes=config.n_classes)
     cnn_out = Flatten()(cnn_out)
     x = Dense(128, activation='relu')(cnn_out)
     x = Dense(64, activation='relu')(x)
