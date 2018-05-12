@@ -51,8 +51,6 @@ def crop(image, shape=(299, 299), random=False):
     else:
         start = ((image.shape[0] - shape[0])//2, (image.shape[1] - shape[1]) // 2)
     #new_img[:,:,:] = image[start[0]:start[0]+shape[0], start[1]:start[1]+shape[1], :]
-    print(new_img.shape)
-    print(image.shape)
     new_img[:,:,:] = image[:shape[0], :shape[1], :]
 
     return new_img
