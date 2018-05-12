@@ -7,7 +7,7 @@ if os.path.isdir('test_imgs/'):
 os.mkdir('test_imgs/')
 
 img_files = os.listdir('imgs/')
-test_files = np.random.choice(img_files, size=int(0.1 * len(img_files)))
+test_files = np.random.choice(img_files, size=int(0.1 * len(img_files)), replace=False)
 
 for file in test_files:
     shutil.move('imgs/' + file, 'test_imgs/')
