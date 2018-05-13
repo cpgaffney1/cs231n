@@ -15,6 +15,7 @@ class Config:
 def build_model(config):
     numeric_inputs = Input(shape=(config.numeric_input_size,))
     img_inputs = Input(shape=config.img_shape)
+    #text_inputs = Input(shape=)
 
     #running cnn
     #image_model = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
@@ -37,7 +38,7 @@ def build_model(config):
     fc_out = Dense(64, activation='relu')(x)
 
     #running RNN
-    #MISSING
+
     #rnn_out
     # to top layer of text network
 
@@ -53,6 +54,6 @@ def build_model(config):
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
-    opt = Adam(lr=0.00001)
+    opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
     return model

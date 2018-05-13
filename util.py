@@ -1,6 +1,11 @@
 import numpy as np
 from PIL import Image
+import os
+import sys
+import re
 
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
 
 def shuffle_in_parallel(arr1, arr2):
     assert(len(arr1) == len(arr2))
@@ -61,3 +66,43 @@ def buckets(x, num=1000):
     bins = np.linspace(0,np.max(x), num=num)
     y = np.digitize(x,bins, right=True)
     return y
+
+
+def clean_text(descr):
+    '''if (descr[0] != '"' or descr[-1] != '"') and (descr[0] != "'" or descr[-1] != "'"):
+        print(descr)'''
+    assert((descr[0] == "'" and descr[-1] == "'") or (descr[0] == '"' and descr[-1] == '"'))
+    descr = descr[1:-1]
+    match = re.search(r'For sale: \$(\d*,)*\d*\.', descr)
+    if match is None:
+        print(descr)
+    return descr[match.end():].strip()
+
+def tokenize_texts(text_data):
+    text_data_list = []
+    for key in text_data.keys():
+        descr = text_data[key][0]
+        text_data_list.append(clean_text(descr))
+
+    tokenizer = Tokenizer()
+    tokenizer.fit_on_texts(text_data_list)
+    return tokenizer.word_index
+
+def load_embedding_matrix(word_index, filename='glove.twitter.27B.50d.txt', embed_dim=50):
+    embeddings_index = {}
+    f = open('wordvec/' + filename, encoding='utf8', errors='replace')
+    for line in f:
+        values = line.split()
+        word = values[0]
+        coefs = np.asarray(values[1:], dtype='float32')
+        embeddings_index[word] = coefs
+    f.close()
+
+    embedding_matrix = np.zeros((len(word_index) + 1, embed_dim))
+    for word, i in word_index.items():
+        embedding_vector = embeddings_index.get(word)
+        if embedding_vector is not None:
+            # words not found in embedding index will be all-zeros.
+            embedding_matrix[i] = embedding_vector
+
+    return embedding_matrix
