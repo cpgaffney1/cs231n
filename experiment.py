@@ -84,7 +84,7 @@ def train_model(model, config, numeric_data, text_data):
             # fit model on data batch
             reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5,
                                           patience=3, min_lr=0.0000001)
-            history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100, :, :, :]],
+            history = model.fit([numeric_data_batch[:200, 1:3], img_data_batch[:200, :, :, :]],
                       util.buckets(numeric_data_batch[:200, 3], num=config.n_classes),
                       batch_size=config.batch_size, validation_split=0.1, epochs=1000,
                       callbacks=[reduce_lr])
