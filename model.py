@@ -13,7 +13,8 @@ class Config:
     embed_dim = 50
     max_seq_len = 30
     def __init__(self, word_index, embedding_matrix, lr=0.0001, n_recurrent_layers=2, n_numeric_layers=2,
-                 trainable_convnet=True, imagenet_weights=True, n_top_hidden_layers=3, n_convnet_fc_layers=3):
+                 trainable_convnet=True, imagenet_weights=True, n_top_hidden_layers=3, n_convnet_fc_layers=3,
+                 n_classes=1000):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
         self.vocab_size = len(word_index)
@@ -26,6 +27,7 @@ class Config:
         self.imagenet_weights = imagenet_weights
         self.n_top_hidden_layers = n_top_hidden_layers
         self.n_convnet_fc_layers = n_convnet_fc_layers
+        self.n_classes = n_classes
 
 def build_model(config):
     numeric_inputs = Input(shape=(config.numeric_input_size,))

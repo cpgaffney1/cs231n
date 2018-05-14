@@ -23,7 +23,8 @@ def main():
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
 
-    config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet=False)
+    config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet=False,
+                    n_classes=200)
     model = build_model(config)
     train_model(model, config, numeric_data, text_data)
 
