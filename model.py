@@ -44,7 +44,7 @@ def build_model(config):
     image_model = MobileNet(input_shape=config.img_shape, include_top=False, weights=weights,
                         input_tensor=img_inputs, classes=config.n_classes)
     #freeze lower layers
-    for i in range(len(image_model.layers) - config.trainable_convnet_layers):
+    for i in range(75):#len(image_model.layers) - config.trainable_convnet_layers):
         image_model.layers[i].trainable = False
 
     cnn_out = image_model(img_inputs)
@@ -84,6 +84,6 @@ def build_model(config):
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
-    opt = Adam(lr=0.00001)
+    opt = Adam(lr=0.000001)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
     return model
