@@ -3,6 +3,7 @@ from PIL import Image
 import os
 import sys
 import re
+import matplotlib.pyplot as plt
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -50,15 +51,15 @@ def load_for_lin_reg():
     return x_train, y_train, x_dev, y_dev, x_test, y_test
 
 def crop(image, shape=(299, 299), random=False):
-    '''for i in range(len(shape)):
+    for i in range(len(shape)):
         assert(image.shape[i] >= shape[i])
     new_img = np.zeros((shape[0], shape[1], 3))
     if random:
         start = (np.random.randint(0, image.shape[0] - shape[0]), np.random.randint(0, image.shape[1] - shape[1]))
     else:
         start = ((image.shape[0] - shape[0])//2, (image.shape[1] - shape[1]) // 2)
-    new_img[:,:,:] = image[start[0]:start[0]+shape[0], start[1]:start[1]+shape[1], :]'''
-    new_img = image[:shape[0], :shape[1], :]
+    #new_img[:,:,:] = image[start[0]:start[0]+shape[0], start[1]:start[1]+shape[1], :]
+    new_img = image[start[0]:shape[0]+start[0], start[1]:shape[1]+start[1], :]
     assert(new_img.shape[0] == shape[0] and new_img.shape[1] == shape[1])
     return new_img
 
@@ -106,3 +107,30 @@ def load_embedding_matrix(word_index, filename='glove.twitter.27B.50d.txt', embe
             embedding_matrix[i] = embedding_vector
 
     return embedding_matrix
+
+def print_history(history):
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+    if os.path.exists('Graphs/'):
+        plt.savefig('Graphs/train_history')
+    else:
+        os.makedirs('Graphs/')
+        plt.savefig('Graphs/train_history')
+    # summarize history for loss
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+    if os.path.exists('Graphs/'):
+        plt.savefig('Graphs/train_history')
+    else:
+        os.makedirs('Graphs/')
+        plt.savefig('Graphs/train_history')
