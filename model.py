@@ -12,9 +12,9 @@ class Config:
     batch_size = 64
     embed_dim = 50
     max_seq_len = 30
-    def __init__(self, word_index, embedding_matrix, lr=0.001, n_recurrent_layers=2, n_numeric_layers=2,
+    def __init__(self, word_index, embedding_matrix, lr=0.0001, n_recurrent_layers=2, n_numeric_layers=2,
                  trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=3, n_convnet_fc_layers=3,
-                 n_classes=1000, drop_prob=0.0):
+                 n_classes=1000):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
         self.vocab_size = len(word_index)
@@ -28,7 +28,6 @@ class Config:
         self.n_top_hidden_layers = n_top_hidden_layers
         self.n_convnet_fc_layers = n_convnet_fc_layers
         self.n_classes = n_classes
-        self.drop_prob = 0.0
 
 def build_model(config):
     numeric_inputs = Input(shape=(config.numeric_input_size,))
@@ -43,7 +42,7 @@ def build_model(config):
     else:
         weights = None
     image_model = MobileNet(input_shape=config.img_shape, include_top=False, weights=weights,
-                        input_tensor=img_inputs, classes=config.n_classes, dropout=config.drop_prob)
+                        input_tensor=img_inputs, classes=config.n_classes, dropout=0.0)
     #freeze lower layers
     for i in range(len(image_model.layers) - config.trainable_convnet_layers):
         image_model.layers[i].trainable = False
