@@ -32,7 +32,7 @@ class Config:
 def build_model(config):
     numeric_inputs = Input(shape=(config.numeric_input_size,))
     img_inputs = Input(shape=config.img_shape)
-    text_inputs = Input(shape=config.text_shape)
+    #text_inputs = Input(shape=config.text_shape)
 
     #running cnn
     #image_model = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
@@ -61,7 +61,7 @@ def build_model(config):
         x = Dense(64, activation='relu')(x)
     fc_out = x
     #running RNN
-    embedding_layer = Embedding(len(config.word_index) + 1, config.embed_dim,
+    '''embedding_layer = Embedding(len(config.word_index) + 1, config.embed_dim,
                                 weights=[config.embedding_matrix],
                                 input_length=config.max_seq_len,
                                 trainable=False)
@@ -69,7 +69,7 @@ def build_model(config):
     lstm = LSTM(128)(embedded_seqs)
     for i in range(config.n_recurrent_layers - 1):
         lstm = LSTM(64)(lstm)
-    rnn_out = lstm
+    rnn_out = lstm'''
     #rnn_out
     # to top layer of text network
 
