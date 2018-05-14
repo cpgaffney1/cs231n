@@ -10,7 +10,7 @@ import preprocessing
 from keras.callbacks import ReduceLROnPlateau
 
 num_data_files = 50
-n_epochs = 10
+n_epochs = 100
 
 def main():
     print()
@@ -75,6 +75,7 @@ def train_model(model, config, numeric_data, text_data):
 
     data_indices = np.asarray(list(range(num_data_files)))
     np.random.shuffle(data_indices)
+    history = None
     #training loop
     for epoch in range(n_epochs):
         for index in data_indices:
@@ -88,7 +89,7 @@ def train_model(model, config, numeric_data, text_data):
                                           patience=4, min_lr=0.0000001)
             history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100, :, :, :]],
                       util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
-                      batch_size=config.batch_size, validation_split=0.1, epochs=1000,
+                      batch_size=config.batch_size, validation_split=0.1, epochs=1,
                       callbacks=[reduce_lr])
     util.print_history(history)
 

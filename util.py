@@ -109,6 +109,8 @@ def load_embedding_matrix(word_index, filename='glove.twitter.27B.50d.txt', embe
     return embedding_matrix
 
 def print_history(history):
+    if history is None:
+        return
     plt.plot(history.history['acc'])
     plt.plot(history.history['val_acc'])
     plt.title('model accuracy')
