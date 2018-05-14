@@ -104,7 +104,7 @@ def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), b
     global loaded_numeric_data
     global loaded_descriptions
     loaded_img_data, loaded_numeric_data, loaded_descriptions, addresses = \
-        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size), text_data, numeric_data, desired_shape=img_shape)
+        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size, replace=False), text_data, numeric_data, desired_shape=img_shape)
     #loaded_img_data = np.load('data/img_data{}.npy'.format(index))
     #loaded_numeric_data = np.load('data/numeric_data{}.npy'.format(index))
 

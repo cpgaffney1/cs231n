@@ -84,23 +84,25 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
             print('file unreadable')
             continue
         data = np.array(img)
-        if  data.shape != (300, 400, 3):
+        if data.shape != (300, 400, 3):
             # skip if improper shape. most are 300 x 400
             continue
         zpid = file[:-4]
-        if zpid in text_data.keys() and zpid in numeric_data.keys():
-            zpid_list[zpid] = i
-        else:
+        if zpid not in text_data.keys() or zpid not in numeric_data.keys():
             continue
         x_shapes.append(data.shape[0])
         y_shapes.append(data.shape[1])
+        assert(zpid not in zpid_list.keys())
+        zpid_list[zpid] = i
+        assert(i == len(img_arrays))
         img_arrays.append(data)
         i += 1
 
+    assert(len(img_arrays) == len(zpid_list.keys()))
     sys.stdout.write('>\n')
     sys.stdout.flush()
 
-    N = len(img_arrays)
+    N = len(zpid_list)
     print('N is {}'.format(N))
 
     ordered_descriptions = [''] * N
@@ -111,7 +113,6 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
         ordered_descriptions[index] = text_data[zpid][0]
         ordered_addresses[index] = text_data[zpid][1]
         ordered_numeric_data[index] = numeric_data[zpid]
-
     imgs = np.zeros((N, desired_shape[0], desired_shape[1], desired_shape[2]), dtype=np.uint8)
     for i in range(N):
         returned_image = util.crop(img_arrays[i], shape=(desired_shape[0], desired_shape[1]))
