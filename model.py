@@ -12,7 +12,7 @@ class Config:
     batch_size = 64
     embed_dim = 50
     max_seq_len = 30
-    def __init__(self, word_index, embedding_matrix, lr=0.001, n_recurrent_layers=2, n_numeric_layers=2,
+    def __init__(self, word_index, embedding_matrix, lr=0.0001, n_recurrent_layers=2, n_numeric_layers=2,
                  trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=3, n_convnet_fc_layers=3,
                  n_classes=1000):
         self.word_index = word_index
@@ -44,8 +44,8 @@ def build_model(config):
     image_model = MobileNet(input_shape=config.img_shape, include_top=False, weights=weights,
                         input_tensor=img_inputs, classes=config.n_classes)
     #freeze lower layers
-    for i in range(75):#len(image_model.layers) - config.trainable_convnet_layers):
-        image_model.layers[i].trainable = True
+    for i in range(len(image_model.layers) - config.trainable_convnet_layers):
+        image_model.layers[i].trainable = False
 
     cnn_out = image_model(img_inputs)
     cnn_out = Flatten()(cnn_out)
@@ -55,10 +55,10 @@ def build_model(config):
     cnn_out = x
 
     #running fc
-    x = Dense(64, activation='relu')(numeric_inputs)
-    for i in range(config.n_numeric_layers - 1):
-        x = Dense(64, activation='relu')(x)
-    fc_out = x
+    #x = Dense(64, activation='relu')(numeric_inputs)
+    #for i in range(config.n_numeric_layers - 1):
+    #    x = Dense(64, activation='relu')(x)
+    #fc_out = x
     #running RNN
     '''embedding_layer = Embedding(len(config.word_index) + 1, config.embed_dim,
                                 weights=[config.embedding_matrix],
@@ -73,17 +73,17 @@ def build_model(config):
     # to top layer of text network
 
     #concat them
-    x = concatenate([cnn_out, fc_out])#, rnn_out])
+    #x = concatenate([cnn_out, fc_out])#, rnn_out])
 
     #Final Fc
-    for i in range(config.n_top_hidden_layers):
-        x = Dense(64, activation='relu')(x)
+    #for i in range(config.n_top_hidden_layers):
+    #    x = Dense(64, activation='relu')(x)
 
     #Output Layer #Check if linear is a valid activation
     predictions = Dense(config.n_classes, activation='linear', name='main_output')(x)
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
-    opt = Adam(lr=0.001)
+    opt = Adam(lr=config.lr)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
     return model
