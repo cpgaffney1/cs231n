@@ -36,19 +36,21 @@ def sample_params():
     trainable_convnet_layers = np.random.randint(0, 30)
     imagenet_weights = np.random.randint(0, 1)
     n_top_hidden_layers = np.random.randint(1, 5)
+    drop_prob = 0.0
     return lr, n_recurrent_layers, n_numeric_layers, trainable_convnet_layers, imagenet_weights, \
-        n_top_hidden_layers, n_convnet_fc_layers
+        n_top_hidden_layers, n_convnet_fc_layers, drop_prob
 
 
 def optimize_params(word_index, embedding_matrix, n_trials=1000):
     numeric_data, text_data = preprocessing.load_tabular_data()
     for t in range(n_trials):
         lr, n_recurrent_layers, n_numeric_layers, trainable_convnet_layers, imagenet_weights, \
-            n_top_hidden_layers, n_convnet_fc_layers = sample_params()
+            n_top_hidden_layers, n_convnet_fc_layers, drop_prob = sample_params()
         config = Config(word_index, embedding_matrix, lr=lr, n_recurrent_layers=n_recurrent_layers,
                         n_numeric_layers=n_numeric_layers, trainable_convnet_layers=trainable_convnet_layers,
                         imagenet_weights=imagenet_weights,
-                        n_top_hidden_layers= n_top_hidden_layers, n_convnet_fc_layers=n_convnet_fc_layers)
+                        n_top_hidden_layers= n_top_hidden_layers, n_convnet_fc_layers=n_convnet_fc_layers,
+                        drop_prob=drop_prob)
         model = build_model(config)
         train_model(model, config, numeric_data, text_data)
 
