@@ -1,21 +1,28 @@
-from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate
+from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
 from keras.optimizers import Adam
+from keras.layers import Embedding
 
 class Config:
     numeric_input_size = 2
     img_shape = (224,224,3)
     n_classes = 1000
-    batch_size = 32
-    def __init__(self):
-        pass
+    batch_size = 64
+    embed_dim = 50
+    max_seq_len = 30
+    def __init__(self, word_index, embedding_matrix):
+        self.word_index = word_index
+        self.embedding_matrix = embedding_matrix
+        self.vocab_size = len(word_index)
+        self.embed_dim = embedding_matrix.shape[1]
+        self.text_shape = (self.max_seq_len, self.vocab_size)
 
 def build_model(config):
     numeric_inputs = Input(shape=(config.numeric_input_size,))
     img_inputs = Input(shape=config.img_shape)
-    #text_inputs = Input(shape=)
+    text_inputs = Input(shape=config.text_shape)
 
     #running cnn
     #image_model = Xception(include_top=False, weights='imagenet', input_tensor=img_inputs, input_shape=config.img_shape,
@@ -34,11 +41,16 @@ def build_model(config):
 
     #running fc
     x = Dense(64, activation='relu')(numeric_inputs)
-    x = Dense(64, activation='relu')(x)
     fc_out = Dense(64, activation='relu')(x)
 
     #running RNN
-
+    embedding_layer = Embedding(len(config.word_index) + 1, config.embed_dim,
+                                weights=[config.embedding_matrix],
+                                input_length=config.max_seq_len,
+                                trainable=False)
+    embedded_seqs = embedding_layer(text_inputs)
+    lstm = LSTM(128)(embedded_seqs)
+    rnn_out = LSTM(64)(lstm)
     #rnn_out
     # to top layer of text network
 

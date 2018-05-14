@@ -86,7 +86,7 @@ def tokenize_texts(text_data):
 
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(text_data_list)
-    return tokenizer.word_index
+    return tokenizer.word_index, tokenizer
 
 def load_embedding_matrix(word_index, filename='glove.twitter.27B.50d.txt', embed_dim=50):
     embeddings_index = {}

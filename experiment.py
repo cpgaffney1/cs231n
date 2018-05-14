@@ -20,13 +20,12 @@ def main():
 
     numeric_data, text_data = preprocessing.load_tabular_data()
 
-    word_index = util.tokenize_texts(text_data)
+    word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
-    exit()
 
-    config = Config()
+    config = Config(word_index, embedding_matrix)
     model = build_model(config)
-    train_model(model, config)
+    train_model(model, config, numeric_data, text_data)
 
 
 def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
@@ -34,16 +33,18 @@ def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
     reg.fit(x_train, y_train)
     return reg
 
-def train_model(model, config):
+def train_model(model, config, numeric_data, text_data):
     global loaded_img_data
     global loaded_numeric_data
+    global loaded_descriptions
 
     img_files = os.listdir('imgs/')
 
     #load initial data
-    numeric_data, text_data = preprocessing.load_tabular_data()
     load_data_batch(img_files, numeric_data, text_data, img_shape=config.img_shape)
-    img_data = loaded_img_data.copy()
+    img_data_batch = loaded_img_data.copy()
+    numeric_data_batch = loaded_numeric_data.copy()
+    text_data_batch = loaded_descriptions.copy()
 
     data_indices = np.asarray(list(range(num_data_files)))
     np.random.shuffle(data_indices)
@@ -52,14 +53,14 @@ def train_model(model, config):
         for index in data_indices:
             print('Fitting, epoch: {}'.format(epoch))
             #start loading data
-            #data_thread = Thread(target=load_data_batch, args=(img_files,))
+            #data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, img_))
             #data_thread.start()
 
             # fit model on data batch
             reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5,
                                           patience=3, min_lr=0.0000001)
-            model.fit([numeric_data[:200, 1:3], img_data[:200, :, :, :]],
-                      util.buckets(numeric_data[:200, 3], num=config.n_classes),
+            model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100, :, :, :]],
+                      util.buckets(numeric_data_batch[:200, 3], num=config.n_classes),
                       batch_size=config.batch_size, validation_split=0.1, epochs=1000,
                       callbacks=[reduce_lr])
 
@@ -70,11 +71,14 @@ def train_model(model, config):
 
 
 loaded_img_data = None
+loaded_numeric_data = None
+loaded_descriptions = None
 def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), batch_size=1000):
     global loaded_img_data
-    imgs, numeric_data, descriptions, addresses= \
+    global loaded_numeric_data
+    global loaded_descriptions
+    loaded_img_data, loaded_numeric_data, loaded_descriptions, addresses = \
         preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size), text_data, numeric_data, desired_shape=img_shape)
-    loaded_img_data = imgs
     #loaded_img_data = np.load('data/img_data{}.npy'.format(index))
     #loaded_numeric_data = np.load('data/numeric_data{}.npy'.format(index))
 
