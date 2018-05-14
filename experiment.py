@@ -77,6 +77,7 @@ def train_model(model, config, numeric_data, text_data):
     np.random.shuffle(data_indices)
     history = None
     #training loop
+    data_indices = [1]
     for epoch in range(n_epochs):
         for index in data_indices:
             print('Fitting, epoch: {}'.format(epoch))

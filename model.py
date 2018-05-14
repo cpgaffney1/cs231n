@@ -2,6 +2,7 @@ from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, 
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
+from keras.applications.resnet50 import ResNet50
 from keras.optimizers import Adam
 from keras.layers import Embedding
 
@@ -42,7 +43,7 @@ def build_model(config):
         weights = 'imagenet'
     else:
         weights = None
-    image_model = Xception(input_shape=config.img_shape, include_top=False, weights=weights,
+    image_model = ResNet50(input_shape=config.img_shape, include_top=False, weights=weights,
                         input_tensor=img_inputs, classes=config.n_classes)
     #freeze lower layers
     #for i in range(len(image_model.layers) - config.trainable_convnet_layers):
