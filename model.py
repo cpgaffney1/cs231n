@@ -45,7 +45,7 @@ def build_model(config):
                         input_tensor=img_inputs, classes=config.n_classes)
     #freeze lower layers
     for i in range(75):#len(image_model.layers) - config.trainable_convnet_layers):
-        image_model.layers[i].trainable = False
+        image_model.layers[i].trainable = True
 
     cnn_out = image_model(img_inputs)
     cnn_out = Flatten()(cnn_out)
@@ -84,6 +84,6 @@ def build_model(config):
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
-    opt = Adam(lr=0.000001)
+    opt = Adam(lr=0.0001)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
     return model
