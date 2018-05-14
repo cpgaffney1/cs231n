@@ -12,8 +12,8 @@ class Config:
     batch_size = 64
     embed_dim = 50
     max_seq_len = 30
-    def __init__(self, word_index, embedding_matrix, lr=0.0001, n_recurrent_layers=2, n_numeric_layers=2,
-                 trainable_convnet=True, imagenet_weights=True, n_top_hidden_layers=3, n_convnet_fc_layers=3,
+    def __init__(self, word_index, embedding_matrix, lr=0.001, n_recurrent_layers=2, n_numeric_layers=2,
+                 trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=3, n_convnet_fc_layers=3,
                  n_classes=1000):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
@@ -23,7 +23,7 @@ class Config:
         self.lr = lr
         self.n_recurrent_layers = n_recurrent_layers
         self.n_numeric_layers = n_numeric_layers
-        self.trainable_convnet = trainable_convnet
+        self.trainable_convnet_layers = trainable_convnet_layers
         self.imagenet_weights = imagenet_weights
         self.n_top_hidden_layers = n_top_hidden_layers
         self.n_convnet_fc_layers = n_convnet_fc_layers
@@ -45,7 +45,7 @@ def build_model(config):
                         input_tensor=img_inputs, classes=config.n_classes)
     #freeze lower layers
     if not config.trainable_convnet:
-        for i in range(75):
+        for i in range(len(image_model.layers) - config.trainable_convnet_layers):
             image_model.layers[i].trainable = False
 
     cnn_out = image_model(img_inputs)
