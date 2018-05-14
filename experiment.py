@@ -23,9 +23,33 @@ def main():
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
 
-    config = Config(word_index, embedding_matrix)
+    config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet=False)
     model = build_model(config)
     train_model(model, config, numeric_data, text_data)
+
+def sample_params():
+    lr = np.random.uniform(0.000001, 0.01)
+    n_recurrent_layers = np.random.randint(1, 3)
+    n_numeric_layers = np.random.randint(1, 3)
+    n_convnet_fc_layers = np.random.randint(1, 4)
+    trainable_convnet = np.random.randint(0, 1)
+    imagenet_weights = np.random.randint(0, 1)
+    n_top_hidden_layers = np.random.randint(1, 5)
+    return lr, n_recurrent_layers, n_numeric_layers, trainable_convnet, imagenet_weights, \
+        n_top_hidden_layers, n_convnet_fc_layers
+
+
+def optimize_params(word_index, embedding_matrix, n_trials=1000):
+    numeric_data, text_data = preprocessing.load_tabular_data()
+    for t in range(n_trials):
+        lr, n_recurrent_layers, n_numeric_layers, trainable_convnet, imagenet_weights, \
+            n_top_hidden_layers, n_convnet_fc_layers = sample_params()
+        config = Config(word_index, embedding_matrix, lr=lr, n_recurrent_layers=n_recurrent_layers,
+                        n_numeric_layers=n_numeric_layers, trainable_convnet=trainable_convnet,
+                        imagenet_weights=imagenet_weights,
+                        n_top_hidden_layers= n_top_hidden_layers, n_convnet_fc_layers=n_convnet_fc_layers)
+        model = build_model(config)
+        train_model(model, config, numeric_data, text_data)
 
 
 def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
