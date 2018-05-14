@@ -43,10 +43,10 @@ def sample_params():
 def optimize_params(word_index, embedding_matrix, n_trials=1000):
     numeric_data, text_data = preprocessing.load_tabular_data()
     for t in range(n_trials):
-        lr, n_recurrent_layers, n_numeric_layers, trainable_convnet, imagenet_weights, \
+        lr, n_recurrent_layers, n_numeric_layers, trainable_convnet_layers, imagenet_weights, \
             n_top_hidden_layers, n_convnet_fc_layers = sample_params()
         config = Config(word_index, embedding_matrix, lr=lr, n_recurrent_layers=n_recurrent_layers,
-                        n_numeric_layers=n_numeric_layers, trainable_convnet=trainable_convnet,
+                        n_numeric_layers=n_numeric_layers, trainable_convnet_layers=trainable_convnet_layers,
                         imagenet_weights=imagenet_weights,
                         n_top_hidden_layers= n_top_hidden_layers, n_convnet_fc_layers=n_convnet_fc_layers)
         model = build_model(config)
@@ -82,10 +82,10 @@ def train_model(model, config, numeric_data, text_data):
             #data_thread.start()
 
             # fit model on data batch
-            reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5,
-                                          patience=3, min_lr=0.0000001)
-            history = model.fit([numeric_data_batch[:200, 1:3], img_data_batch[:200, :, :, :]],
-                      util.buckets(numeric_data_batch[:200, 3], num=config.n_classes),
+            reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
+                                          patience=4, min_lr=0.0000001)
+            history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100, :, :, :]],
+                      util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
                       batch_size=config.batch_size, validation_split=0.1, epochs=1000,
                       callbacks=[reduce_lr])
     util.print_history(history)
