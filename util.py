@@ -8,12 +8,12 @@ import matplotlib.pyplot as plt
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
+
 def shuffle_in_parallel(arr1, arr2):
     assert(len(arr1) == len(arr2))
     indices = np.arange(len(arr1))
     np.random.shuffle(indices)
     return arr1[indices], arr2[indices]
-
 
 
 #splits train, dev, test
@@ -50,6 +50,7 @@ def load_for_lin_reg():
     x_train, y_train, x_dev, y_dev, x_test, y_test = split_data(X, y)
     return x_train, y_train, x_dev, y_dev, x_test, y_test
 
+
 def crop(image, shape=(299, 299), random=False):
     for i in range(len(shape)):
         assert(image.shape[i] >= shape[i])
@@ -62,6 +63,7 @@ def crop(image, shape=(299, 299), random=False):
     new_img = image[start[0]:shape[0]+start[0], start[1]:shape[1]+start[1], :]
     assert(new_img.shape[0] == shape[0] and new_img.shape[1] == shape[1])
     return new_img
+
 
 def buckets(x, num=1000):
     bins = np.linspace(0,np.max(x), num=num)
@@ -79,6 +81,7 @@ def clean_text(descr):
         print(descr)
     return descr[match.end():].strip()
 
+
 def tokenize_texts(text_data):
     text_data_list = []
     for key in text_data.keys():
@@ -88,6 +91,7 @@ def tokenize_texts(text_data):
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(text_data_list)
     return tokenizer.word_index, tokenizer
+
 
 def load_embedding_matrix(word_index, filename='glove.twitter.27B.50d.txt', embed_dim=50):
     embeddings_index = {}
@@ -108,6 +112,7 @@ def load_embedding_matrix(word_index, filename='glove.twitter.27B.50d.txt', embe
 
     return embedding_matrix
 
+
 def print_history(history):
     if history is None:
         return
@@ -126,7 +131,7 @@ def print_history(history):
     # summarize history for loss
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
-    plt.title('model loss')
+    plt.title('Model Loss')
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
@@ -136,3 +141,18 @@ def print_history(history):
     else:
         os.makedirs('Graphs/')
         plt.savefig('Graphs/train_history')
+
+
+def print_distribution(pred , real = None):
+    bins = np.linspace(0, 200, 10)
+    plt.hist(pred, bins, alpha=0.5, label='Prediction')
+    if(real):
+        plt.hist(real, bins, alpha=0.5, label='Real')
+    plt.legend(loc='upper right')
+    plt.title('Baseline Results')
+    plt.show()
+    if os.path.exists('Graphs/'):
+        plt.savefig('Graphs/Baseline_Results')
+    else:
+        os.makedirs('Graphs/')
+        plt.savefig('Graphs/Baseline_Results')

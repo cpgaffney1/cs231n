@@ -59,8 +59,8 @@ def optimize_params(word_index, embedding_matrix, n_trials=1000):
         train_model(model, config, numeric_data, text_data)
 
 
-def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
-    reg = sklm.LinearRegression()
+def logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
+    reg = sklm.logistic_regression_path()
     reg.fit(x_train, y_train)
     return reg
 
