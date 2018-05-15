@@ -7,6 +7,7 @@ from model import build_model, Config, write_model
 import os
 import sys
 import pickle
+import argparse
 import preprocessing
 
 from keras.callbacks import ReduceLROnPlateau, TensorBoard
@@ -14,8 +15,7 @@ from keras.callbacks import ReduceLROnPlateau, TensorBoard
 num_data_files = 50
 n_epochs = 1000
 
-def main():
-    print()
+def train(args):
     if not os.path.exists('models/'):
         os.mkdir('models/')
     ## run param search and other stuff
@@ -91,7 +91,7 @@ def train_model(model, config, numeric_data, text_data):
         #data_thread.start()
 
         # fit model on data batch
-        history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[100, :, :, :]],
+        history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100]],
                             util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
                             batch_size=config.batch_size, validation_split=0.1, epochs=1,
                             callbacks=[reduce_lr, tensorboard])
@@ -126,6 +126,21 @@ def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), v
 
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Trains and tests the model.')
+    subparsers = parser.add_subparsers()
+
+    command_parser = subparsers.add_parser('train', help='trains model')
+    command_parser.add_argument('-r', '--resume', action='store_true', default=False, help="Resume training with existing model")
+    command_parser.set_defaults(func=train)
+
+
+
+    ARGS = parser.parse_args()
+    if ARGS.func is None:
+        parser.print_help()
+        sys.exit(1)
+    else:
+        ARGS.func(ARGS)
+
 
