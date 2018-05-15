@@ -20,10 +20,10 @@ def train(args):
         os.mkdir('models/')
     if args.name is not None and not os.path.exists('models/' + args.name):
         os.mkdir('models/' + args.name)
-        model_folder = 'models/' + args.name
+        model_folder = 'models/' + args.name + '/'
     else:
         model_subfolders = os.listdir('models/')
-        model_folder = 'models/' + str(len(model_subfolders))
+        model_folder = 'models/' + str(len(model_subfolders)) + '/'
 
     ## run param search and other stuff
     #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
@@ -87,7 +87,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
                                   patience=3, min_lr=0.0000001)
-    tensorboard = TensorBoard(log_dir='logs/', write_grads=True, write_images=True, histogram_freq=2)
+    tensorboard = TensorBoard(log_dir='logs/', write_images=True, histogram_freq=2)
 
     history = None
     #training loop
@@ -105,7 +105,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
 
         #if history.history['val_loss'][-1] < best_val_loss:
         #    best_val_loss = history.history['val_loss'][-1]
-        #    write_model(model, config, best_val_loss)
+        #    write_model(model, config, best_val_loss, model_folder)
 
         # retrieve new data
         #data_thread.join()

@@ -91,10 +91,11 @@ def build_model(config):
 
 import os
 import pickle
-def write_model(model, config, best_val_loss):
+def write_model(model, config, best_val_loss, model_folder):
     try:
-        os.mkdir('models/val_loss_{}/'.format(best_val_loss))
+        os.mkdir(model_folder + 'val_loss_{}/'.format(best_val_loss))
     except:
         print('unable to create dir')
-    model.save('models/val_loss_{}/model.h5'.format(best_val_loss))
-    pickle.dump(config, 'models/val_loss_{}/config.h5'.format(best_val_loss))
+        return
+    model.save(model_folder + 'val_loss_{}/model.h5'.format(best_val_loss))
+    pickle.dump(config, model_folder + 'val_loss_{}/config'.format(best_val_loss))
