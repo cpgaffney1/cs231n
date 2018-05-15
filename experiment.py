@@ -13,7 +13,7 @@ import preprocessing
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger
 
 num_data_files = 50
-n_epochs = 1000
+n_iterations = 1000
 
 def train(args):
     if not os.path.exists('models/'):
@@ -35,7 +35,10 @@ def train(args):
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
                     n_classes=100)
         model = build_model(config)
-        if args.name is not None and not os.path.exists('models/' + args.name):
+        if os.path.exists('models/' + args.name):
+            print('A folder with that name already exists.')
+            exit()
+        if args.name is not None:
             os.mkdir('models/' + args.name)
             model_folder = 'models/' + args.name + '/'
         else:
@@ -98,8 +101,8 @@ def train_model(model, config, numeric_data, text_data, model_folder):
 
     history = None
     #training loop
-    for epoch in range(n_epochs):
-        print('Fitting, epoch: {}'.format(epoch))
+    for iteration in range(n_iterations):
+        print('Iteration: {}'.format(iteration))
         # start loading data
         #data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
         #data_thread.start()
@@ -107,8 +110,8 @@ def train_model(model, config, numeric_data, text_data, model_folder):
         # fit model on data batch
         history = model.fit([numeric_data_batch[:20, 1:3], img_data_batch[:20]],
                             util.buckets(numeric_data_batch[:20, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=epoch+3,
-                            callbacks=[reduce_lr, tensorboard, csvlogger], initial_epoch=epoch)
+                            batch_size=config.batch_size, validation_split=0.1, epochs=1000,
+                            callbacks=[reduce_lr, tensorboard, csvlogger], initial_epoch=iteration)
 
         if history.history['val_loss'][-1] < best_val_loss:
             best_val_loss = history.history['val_loss'][-1]
