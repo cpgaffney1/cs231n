@@ -95,7 +95,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
     text_data_batch = loaded_descriptions.copy()
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
-                                  patience=2, min_lr=0.0000001)
+                                  patience=3, min_lr=0.0000001)
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, histogram_freq=2)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
 
