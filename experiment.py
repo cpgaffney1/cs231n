@@ -18,6 +18,13 @@ n_epochs = 1000
 def train(args):
     if not os.path.exists('models/'):
         os.mkdir('models/')
+    if args.name is not None and not os.path.exists('models/' + args.name):
+        os.mkdir('models/' + args.name)
+        model_folder = 'models/' + args.name
+    else:
+        model_subfolders = os.listdir('models/')
+        model_folder = 'models/' + str(len(model_subfolders))
+
     ## run param search and other stuff
     #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
     #reg = linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
@@ -30,7 +37,7 @@ def train(args):
     config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
                     n_classes=500)
     model = build_model(config)
-    train_model(model, config, numeric_data, text_data)
+    train_model(model, config, numeric_data, text_data, model_folder)
 
 def sample_params():
     lr = np.random.uniform(0.000001, 0.01)
@@ -64,7 +71,7 @@ def logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
     reg.fit(x_train, y_train)
     return reg
 
-def train_model(model, config, numeric_data, text_data):
+def train_model(model, config, numeric_data, text_data, model_folder):
     best_val_loss = float('inf')
     global loaded_img_data
     global loaded_numeric_data
@@ -93,7 +100,7 @@ def train_model(model, config, numeric_data, text_data):
         # fit model on data batch
         history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100]],
                             util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=1,
+                            batch_size=config.batch_size, validation_split=0.1, epochs=20,
                             callbacks=[reduce_lr, tensorboard])
 
         #if history.history['val_loss'][-1] < best_val_loss:
@@ -131,7 +138,9 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers()
 
     command_parser = subparsers.add_parser('train', help='trains model')
-    command_parser.add_argument('-r', '--resume', action='store_true', default=False, help="Resume training with existing model")
+    command_parser.add_argument('-n', action='store', dest='name',
+                                help="Save models to folder with designated name")
+    command_parser.add_argument('-r', action='store', dest='folder', help="Resume training with existing model. Input a model folder name")
     command_parser.set_defaults(func=train)
 
 
