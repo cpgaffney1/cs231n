@@ -107,7 +107,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
         # fit model on data batch
         history = model.fit([numeric_data_batch[:20, 1:3], img_data_batch[:20]],
                             util.buckets(numeric_data_batch[:20, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=1,
+                            batch_size=config.batch_size, validation_split=0.1, epochs=epoch+1,
                             callbacks=[reduce_lr, tensorboard, csvlogger], initial_epoch=epoch)
 
         print(history.history.keys())
