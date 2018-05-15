@@ -33,7 +33,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=1000)
+                    n_classes=1000, lr=0.0001)
         model = build_model(config)
         if os.path.exists('models/' + args.name):
             print('A folder with that name already exists.')
