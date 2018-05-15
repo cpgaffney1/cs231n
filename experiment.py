@@ -18,12 +18,6 @@ n_epochs = 1000
 def train(args):
     if not os.path.exists('models/'):
         os.mkdir('models/')
-    if args.name is not None and not os.path.exists('models/' + args.name):
-        os.mkdir('models/' + args.name)
-        model_folder = 'models/' + args.name + '/'
-    else:
-        model_subfolders = os.listdir('models/')
-        model_folder = 'models/' + str(len(model_subfolders)) + '/'
 
     ## run param search and other stuff
     #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
@@ -34,9 +28,21 @@ def train(args):
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
 
+    #if args.resume is not None:
+
     config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
                     n_classes=100)
     model = build_model(config)
+
+
+    if args.name is not None and not os.path.exists('models/' + args.name):
+        os.mkdir('models/' + args.name)
+        model_folder = 'models/' + args.name + '/'
+    else:
+        model_subfolders = os.listdir('models/')
+        model_folder = 'models/' + str(len(model_subfolders)) + '/'
+
+
     train_model(model, config, numeric_data, text_data, model_folder)
 
 def sample_params():
@@ -101,7 +107,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
         history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100]],
                             util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
                             batch_size=config.batch_size, validation_split=0.1, epochs=20,
-                            callbacks=[reduce_lr])
+                            callbacks=[reduce_lr, tensorboard])
 
         #if history.history['val_loss'][-1] < best_val_loss:
         #    best_val_loss = history.history['val_loss'][-1]
