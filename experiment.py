@@ -10,7 +10,7 @@ import pickle
 import argparse
 import preprocessing
 
-from keras.callbacks import ReduceLROnPlateau, TensorBoard
+from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger
 
 num_data_files = 50
 n_epochs = 1000
@@ -44,6 +44,7 @@ def train(args):
 
     train_model(model, config, numeric_data, text_data, model_folder)
 
+'''
 def sample_params():
     lr = np.random.uniform(0.000001, 0.01)
     n_recurrent_layers = np.random.randint(1, 3)
@@ -68,7 +69,7 @@ def optimize_params(word_index, embedding_matrix, n_trials=1000):
                         n_top_hidden_layers= n_top_hidden_layers, n_convnet_fc_layers=n_convnet_fc_layers,
                         drop_prob=drop_prob)
         model = build_model(config)
-        train_model(model, config, numeric_data, text_data, )
+        train_model(model, config, numeric_data, text_data, ) '''
 
 
 def logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
@@ -92,7 +93,8 @@ def train_model(model, config, numeric_data, text_data, model_folder):
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
                                   patience=3, min_lr=0.0000001)
-    tensorboard = TensorBoard(log_dir='logs/', write_images=True, histogram_freq=2)
+    tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, histogram_freq=2)
+    csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
 
     history = None
     #training loop
@@ -103,14 +105,14 @@ def train_model(model, config, numeric_data, text_data, model_folder):
         #data_thread.start()
 
         # fit model on data batch
-        history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100]],
-                            util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=20,
-                            callbacks=[reduce_lr, tensorboard])
+        history = model.fit([numeric_data_batch[:20, 1:3], img_data_batch[:20]],
+                            util.buckets(numeric_data_batch[:20, 3], num=config.n_classes),
+                            batch_size=config.batch_size, validation_split=0.1, epochs=1,
+                            callbacks=[reduce_lr, tensorboard, csvlogger], initial_epoch=epoch)
 
-        #if history.history['val_loss'][-1] < best_val_loss:
-        #    best_val_loss = history.history['val_loss'][-1]
-        #    write_model(model, config, best_val_loss, model_folder)
+        if history.history['val_loss'][-1] < best_val_loss:
+            best_val_loss = history.history['val_loss'][-1]
+            write_model(model, config, best_val_loss, model_folder)
 
         # retrieve new data
         #data_thread.join()
