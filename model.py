@@ -14,7 +14,7 @@ class Config:
     embed_dim = 50
     max_seq_len = 30
     def __init__(self, word_index, embedding_matrix, lr=0.001, n_recurrent_layers=2, n_numeric_layers=1,
-                 trainable_convnet_layers=20, imagenet_weights=False, n_top_hidden_layers=1, n_convnet_fc_layers=4,
+                 trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=1, n_convnet_fc_layers=3,
                  n_classes=1000, drop_prob=0.0):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
