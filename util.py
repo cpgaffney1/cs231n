@@ -65,10 +65,13 @@ def crop(image, shape=(299, 299), random=False):
     return new_img
 
 
-def buckets(x, num=1000):
-    bins = np.linspace(0,np.max(x), num=num)
-    y = np.digitize(x,bins, right=True)
+def buckets(x, bins, num=1000):
+    y = np.digitize(x, bins, right=True)
     return y
+
+def get_bins(prices, num=1000):
+    bins = np.logspace(0, np.max(prices), num=num)
+    return bins
 
 
 def clean_text(descr):

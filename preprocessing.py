@@ -136,6 +136,7 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
 def load_tabular_data():
     numeric_data = {}
     text_data = {}
+    prices = []
     with open('tabular_data/scraped_data.csv', encoding='utf8', errors='replace') as f:
         lines = f.readlines()
         lines = lines[1:]
@@ -144,7 +145,8 @@ def load_tabular_data():
             zpid, zip, price, beds, baths, descr, address = sp
             numeric_data[zpid] = (zip, beds, baths, price)
             text_data[zpid] = (descr, address)
-    return numeric_data, text_data
+            prices.append(float(price))
+    return numeric_data, text_data, prices
 
 def main():
     numeric_data = {}

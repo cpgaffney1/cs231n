@@ -23,7 +23,7 @@ def train(args):
     #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
     #reg = linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
 
-    numeric_data, text_data = preprocessing.load_tabular_data()
+    numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
@@ -33,7 +33,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=10)
+                    n_classes=100)
         model = build_model(config)
         if os.path.exists('models/' + args.name):
             print('A folder with that name already exists.')
@@ -45,7 +45,8 @@ def train(args):
             model_subfolders = os.listdir('models/')
             model_folder = 'models/' + str(len(model_subfolders)) + '/'
 
-    train_model(model, config, numeric_data, text_data, model_folder)
+    bins = util.get_bins(prices, num=config.n_classes)
+    train_model(model, config, numeric_data, text_data, bins, model_folder)
 
 '''
 def sample_params():
@@ -80,7 +81,7 @@ def logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
     reg.fit(x_train, y_train)
     return reg
 
-def train_model(model, config, numeric_data, text_data, model_folder):
+def train_model(model, config, numeric_data, text_data, bins, model_folder):
     best_val_loss = float('inf')
     global loaded_img_data
     global loaded_numeric_data
@@ -104,13 +105,13 @@ def train_model(model, config, numeric_data, text_data, model_folder):
     for iteration in range(n_iterations):
         print('Iteration: {}'.format(iteration))
         # start loading data
-        #data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
-        #data_thread.start()
+        data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
+        data_thread.start()
 
         # fit model on data batch
-        history = model.fit([numeric_data_batch[:20, 1:3], img_data_batch[:20]],
-                            util.buckets(numeric_data_batch[:20, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=1000,
+        history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
+                            util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes),
+                            batch_size=config.batch_size, validation_split=0.1, epochs=1,
                             callbacks=[tensorboard, csvlogger])
 
         if history.history['val_loss'][-1] < best_val_loss:
@@ -118,10 +119,10 @@ def train_model(model, config, numeric_data, text_data, model_folder):
             write_model(model, config, best_val_loss, model_folder)
 
         # retrieve new data
-        #data_thread.join()
-        #img_data_batch = loaded_img_data.copy()
-        #numeric_data_batch = loaded_numeric_data.copy()
-        #text_data_batch = loaded_descriptions.copy()
+        data_thread.join()
+        img_data_batch = loaded_img_data.copy()
+        numeric_data_batch = loaded_numeric_data.copy()
+        text_data_batch = loaded_descriptions.copy()
 
 
     util.print_history(history)
@@ -130,7 +131,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
 loaded_img_data = None
 loaded_numeric_data = None
 loaded_descriptions = None
-def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=1000):
+def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=5000):
     global loaded_img_data
     global loaded_numeric_data
     global loaded_descriptions
