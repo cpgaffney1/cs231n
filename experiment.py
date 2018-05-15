@@ -12,7 +12,7 @@ import preprocessing
 from keras.callbacks import ReduceLROnPlateau, TensorBoard
 
 num_data_files = 50
-n_epochs = 100
+n_epochs = 1000
 
 def main():
     print()
@@ -78,32 +78,33 @@ def train_model(model, config, numeric_data, text_data):
     numeric_data_batch = loaded_numeric_data.copy()
     text_data_batch = loaded_descriptions.copy()
 
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
+                                  patience=3, min_lr=0.0000001)
+    tensorboard = TensorBoard(log_dir='logs/', write_grads=True, write_images=True, histogram_freq=1)
+
     history = None
     #training loop
     for epoch in range(n_epochs):
         print('Fitting, epoch: {}'.format(epoch))
         # start loading data
-        data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
-        data_thread.start()
+        #data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
+        #data_thread.start()
 
         # fit model on data batch
-        reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
-                                      patience=3, min_lr=0.0000001)
-        tensorboard = TensorBoard(log_dir='logs/')
-        history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
-                            util.buckets(numeric_data_batch[:, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=3,
+        history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[100, :, :, :]],
+                            util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
+                            batch_size=config.batch_size, validation_split=0.1, epochs=1,
                             callbacks=[reduce_lr, tensorboard])
 
-        if history.history['val_loss'] < best_val_loss:
-            best_val_loss = history.history['val_loss']
+        if history.history['val_loss'][-1] < best_val_loss:
+            best_val_loss = history.history['val_loss'][-1]
             write_model(model, config, best_val_loss)
 
         # retrieve new data
-        data_thread.join()
-        img_data_batch = loaded_img_data.copy()
-        numeric_data_batch = loaded_numeric_data.copy()
-        text_data_batch = loaded_descriptions.copy()
+        #data_thread.join()
+        #img_data_batch = loaded_img_data.copy()
+        #numeric_data_batch = loaded_numeric_data.copy()
+        #text_data_batch = loaded_descriptions.copy()
 
 
     util.print_history(history)

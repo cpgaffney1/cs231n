@@ -84,8 +84,6 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
         try:
             img = Image.open('imgs/' + file)
         except OSError:
-            if verbose:
-                print('file unreadable')
             continue
         data = np.array(img)
         if data.shape != (300, 400, 3):
