@@ -92,7 +92,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
     text_data_batch = loaded_descriptions.copy()
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
-                                  patience=3, min_lr=0.0000001)
+                                  patience=2, min_lr=0.0000001)
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, histogram_freq=2)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
 
@@ -107,7 +107,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
         # fit model on data batch
         history = model.fit([numeric_data_batch[:20, 1:3], img_data_batch[:20]],
                             util.buckets(numeric_data_batch[:20, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=epoch+1,
+                            batch_size=config.batch_size, validation_split=0.1, epochs=epoch+3,
                             callbacks=[reduce_lr, tensorboard, csvlogger], initial_epoch=epoch)
 
         if history.history['val_loss'][-1] < best_val_loss:
