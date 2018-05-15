@@ -90,7 +90,7 @@ def train_model(model, config, numeric_data, text_data):
         reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
                                       patience=3, min_lr=0.0000001)
         tensorboard = TensorBoard(log_dir='logs/')
-        history = model.fit([numeric_data_batch, img_data_batch],
+        history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], num=config.n_classes),
                             batch_size=config.batch_size, validation_split=0.1, epochs=3,
                             callbacks=[reduce_lr, tensorboard])
@@ -117,7 +117,8 @@ def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), v
     global loaded_numeric_data
     global loaded_descriptions
     loaded_img_data, loaded_numeric_data, loaded_descriptions, addresses = \
-        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size, replace=False), text_data, numeric_data, desired_shape=img_shape)
+        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size, replace=False), text_data, numeric_data,
+                                         desired_shape=img_shape, verbose=verbose)
     #loaded_img_data = np.load('data/img_data{}.npy'.format(index))
     #loaded_numeric_data = np.load('data/numeric_data{}.npy'.format(index))
 

@@ -63,25 +63,29 @@ def process_data_batch_and_write(batchnum, filenames, text_data, numeric_data):
         for y in ordered_addresses:
             of.write('{}\n'.format(repr(y[1:-1])))
 
-def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,299,3)):
+def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,299,3), verbose=True):
     i = 0
     img_arrays = []
     x_shapes = []
     y_shapes = []
     zpid_list = {}
-    print('Processing data batch')
+    if verbose:
+        print('Processing data batch')
     count = 0
-    sys.stdout.write('<')
-    sys.stdout.flush()
+    if verbose:
+        sys.stdout.write('<')
+        sys.stdout.flush()
     for file in filenames:
         if count % 100 == 0:
-            sys.stdout.write('=')
-            sys.stdout.flush()
+            if verbose:
+                sys.stdout.write('=')
+                sys.stdout.flush()
         count += 1
         try:
             img = Image.open('imgs/' + file)
         except OSError:
-            print('file unreadable')
+            if verbose:
+                print('file unreadable')
             continue
         data = np.array(img)
         if data.shape != (300, 400, 3):
@@ -99,11 +103,13 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
         i += 1
 
     assert(len(img_arrays) == len(zpid_list.keys()))
-    sys.stdout.write('>\n')
-    sys.stdout.flush()
+    if verbose:
+        sys.stdout.write('>\n')
+        sys.stdout.flush()
 
     N = len(zpid_list)
-    print('N is {}'.format(N))
+    if verbose:
+        print('N is {}'.format(N))
 
     ordered_descriptions = [''] * N
     ordered_addresses = [''] * N
