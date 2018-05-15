@@ -83,15 +83,15 @@ def train_model(model, config, numeric_data, text_data):
     for epoch in range(n_epochs):
         print('Fitting, epoch: {}'.format(epoch))
         # start loading data
-        data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape))
+        data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
         data_thread.start()
 
         # fit model on data batch
         reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
                                       patience=3, min_lr=0.0000001)
         tensorboard = TensorBoard(log_dir='logs/')
-        history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100, :, :, :]],
-                            util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
+        history = model.fit([numeric_data_batch, img_data_batch],
+                            util.buckets(numeric_data_batch[:, 3], num=config.n_classes),
                             batch_size=config.batch_size, validation_split=0.1, epochs=3,
                             callbacks=[reduce_lr, tensorboard])
 
@@ -112,7 +112,7 @@ def train_model(model, config, numeric_data, text_data):
 loaded_img_data = None
 loaded_numeric_data = None
 loaded_descriptions = None
-def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), batch_size=1000):
+def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=5000):
     global loaded_img_data
     global loaded_numeric_data
     global loaded_descriptions
