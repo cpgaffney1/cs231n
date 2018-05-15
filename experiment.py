@@ -3,7 +3,7 @@ from threading import Thread
 from keras.models import Sequential
 from sklearn import linear_model as sklm
 import util
-from model import build_model, Config, write_model
+from model import build_model, Config, write_model, load_model
 import os
 import sys
 import pickle
@@ -28,20 +28,19 @@ def train(args):
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
 
-    #if args.resume is not None:
-
-    config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=100)
-    model = build_model(config)
-
-
-    if args.name is not None and not os.path.exists('models/' + args.name):
-        os.mkdir('models/' + args.name)
-        model_folder = 'models/' + args.name + '/'
+    if args.folder is not None:
+        config, model = load_model(args.folder)
+        model_folder = 'models/' + args.folder + '/'
     else:
-        model_subfolders = os.listdir('models/')
-        model_folder = 'models/' + str(len(model_subfolders)) + '/'
-
+        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
+                    n_classes=100)
+        model = build_model(config)
+        if args.name is not None and not os.path.exists('models/' + args.name):
+            os.mkdir('models/' + args.name)
+            model_folder = 'models/' + args.name + '/'
+        else:
+            model_subfolders = os.listdir('models/')
+            model_folder = 'models/' + str(len(model_subfolders)) + '/'
 
     train_model(model, config, numeric_data, text_data, model_folder)
 

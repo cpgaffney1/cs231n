@@ -99,3 +99,15 @@ def write_model(model, config, best_val_loss, model_folder):
         return
     model.save(model_folder + 'val_loss_{}/model.h5'.format(best_val_loss))
     pickle.dump(config, model_folder + 'val_loss_{}/config'.format(best_val_loss))
+
+
+from keras.models import load_model as load_keras_model
+def load_model(model_folder):
+    path = 'models/' + model_folder + '/'
+    subfolders = os.listdir(path)
+    val_losses = [float(folder[9:]) for folder in subfolders]
+    path = path + 'val_loss_' + str(min(val_losses)) + '/'
+    model = load_keras_model(path + 'model.h5')
+    config = pickle.load(path + 'config')
+    return config, model
+
