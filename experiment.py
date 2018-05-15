@@ -32,8 +32,8 @@ def train(args):
         config, model = load_model(args.folder)
         model_folder = 'models/' + args.folder + '/'
     else:
-        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=40,
-                    n_classes=20)
+        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
+                    n_classes=100)
         model = build_model(config)
         if os.path.exists('models/' + args.name):
             print('A folder with that name already exists.')
@@ -94,8 +94,8 @@ def train_model(model, config, numeric_data, text_data, model_folder):
     numeric_data_batch = loaded_numeric_data.copy()
     text_data_batch = loaded_descriptions.copy()
 
-    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
-                                  patience=4, min_lr=0.0000001, cooldown=3)
+    #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
+    #                              patience=4, min_lr=0.00001, cooldown=3)
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, histogram_freq=2)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
 
@@ -110,8 +110,8 @@ def train_model(model, config, numeric_data, text_data, model_folder):
         # fit model on data batch
         history = model.fit([numeric_data_batch[:20, 1:3], img_data_batch[:20]],
                             util.buckets(numeric_data_batch[:20, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=1000,
-                            callbacks=[reduce_lr, tensorboard, csvlogger], initial_epoch=iteration)
+                            batch_size=config.batch_size, validation_split=0.1, epochs=iteration+1,
+                            callbacks=[tensorboard, csvlogger], initial_epoch=iteration)
 
         if history.history['val_loss'][-1] < best_val_loss:
             best_val_loss = history.history['val_loss'][-1]
