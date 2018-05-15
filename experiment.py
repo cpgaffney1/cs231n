@@ -28,7 +28,7 @@ def main():
     embedding_matrix = util.load_embedding_matrix(word_index)
 
     config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=100)
+                    n_classes=500)
     model = build_model(config)
     train_model(model, config, numeric_data, text_data)
 
