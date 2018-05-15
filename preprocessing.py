@@ -117,14 +117,14 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
     for i in range(N):
         returned_image = util.crop(img_arrays[i], shape=(desired_shape[0], desired_shape[1]))
         imgs[i] = returned_image
-        '''img = Image.fromarray(returned_image, 'RGB')
+        img = Image.fromarray(returned_image, 'RGB')
         img.show()
         print(returned_image)
         print('\n\n\n')
         print(imgs[i])
         img = Image.fromarray(imgs[i], 'RGB')
         img.show()
-        exit()'''
+        exit()
 
     return imgs, ordered_numeric_data, ordered_descriptions, ordered_addresses
 

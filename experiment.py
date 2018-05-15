@@ -3,17 +3,21 @@ from threading import Thread
 from keras.models import Sequential
 from sklearn import linear_model as sklm
 import util
-from model import build_model, Config
+from model import build_model, Config, write_model
 import os
+import sys
+import pickle
 import preprocessing
 
-from keras.callbacks import ReduceLROnPlateau
+from keras.callbacks import ReduceLROnPlateau, TensorBoard
 
 num_data_files = 50
 n_epochs = 100
 
 def main():
     print()
+    if not os.path.exists('models/'):
+        os.mkdir('models/')
     ## run param search and other stuff
     #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
     #reg = linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
@@ -61,6 +65,7 @@ def linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
     return reg
 
 def train_model(model, config, numeric_data, text_data):
+    best_val_loss = float('inf')
     global loaded_img_data
     global loaded_numeric_data
     global loaded_descriptions
@@ -73,31 +78,35 @@ def train_model(model, config, numeric_data, text_data):
     numeric_data_batch = loaded_numeric_data.copy()
     text_data_batch = loaded_descriptions.copy()
 
-    data_indices = np.asarray(list(range(num_data_files)))
-    np.random.shuffle(data_indices)
     history = None
     #training loop
-    data_indices = [1]
     for epoch in range(n_epochs):
-        for index in data_indices:
-            print('Fitting, epoch: {}'.format(epoch))
-            #start loading data
-            #data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, img_))
-            #data_thread.start()
+        print('Fitting, epoch: {}'.format(epoch))
+        # start loading data
+        data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape))
+        data_thread.start()
 
-            # fit model on data batch
-            reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
-                                          patience=4, min_lr=0.0000001)
-            history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100, :, :, :]],
-                      util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
-                      batch_size=config.batch_size, validation_split=0.1, epochs=1,
-                      callbacks=[reduce_lr])
+        # fit model on data batch
+        reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
+                                      patience=3, min_lr=0.0000001)
+        tensorboard = TensorBoard(log_dir='logs/')
+        history = model.fit([numeric_data_batch[:100, 1:3], img_data_batch[:100, :, :, :]],
+                            util.buckets(numeric_data_batch[:100, 3], num=config.n_classes),
+                            batch_size=config.batch_size, validation_split=0.1, epochs=3,
+                            callbacks=[reduce_lr, tensorboard])
+
+        if history.history['val_loss'] < best_val_loss:
+            best_val_loss = history.history['val_loss']
+            write_model(model, config, best_val_loss)
+
+        # retrieve new data
+        data_thread.join()
+        img_data_batch = loaded_img_data.copy()
+        numeric_data_batch = loaded_numeric_data.copy()
+        text_data_batch = loaded_descriptions.copy()
+
+
     util.print_history(history)
-
-            #retrieve new data
-            #data_thread.join()
-            #img_data = loaded_img_data.copy()
-            #numeric_data = loaded_numeric_data.copy()
 
 
 loaded_img_data = None
