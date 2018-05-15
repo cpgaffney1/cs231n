@@ -96,9 +96,9 @@ def train_model(model, config, numeric_data, text_data):
                             batch_size=config.batch_size, validation_split=0.1, epochs=1,
                             callbacks=[reduce_lr, tensorboard])
 
-        if history.history['val_loss'][-1] < best_val_loss:
-            best_val_loss = history.history['val_loss'][-1]
-            write_model(model, config, best_val_loss)
+        #if history.history['val_loss'][-1] < best_val_loss:
+        #    best_val_loss = history.history['val_loss'][-1]
+        #    write_model(model, config, best_val_loss)
 
         # retrieve new data
         #data_thread.join()
