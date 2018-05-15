@@ -32,7 +32,7 @@ def train(args):
         config, model = load_model(args.folder)
         model_folder = 'models/' + args.folder + '/'
     else:
-        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=10,
+        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
                     n_classes=100)
         model = build_model(config)
         if os.path.exists('models/' + args.name):
@@ -110,8 +110,8 @@ def train_model(model, config, numeric_data, text_data, model_folder):
         # fit model on data batch
         history = model.fit([numeric_data_batch[:20, 1:3], img_data_batch[:20]],
                             util.buckets(numeric_data_batch[:20, 3], num=config.n_classes),
-                            batch_size=config.batch_size, validation_split=0.1, epochs=iteration+1,
-                            callbacks=[tensorboard, csvlogger], initial_epoch=iteration)
+                            batch_size=config.batch_size, validation_split=0.1, epochs=2,
+                            callbacks=[tensorboard, csvlogger])
 
         if history.history['val_loss'][-1] < best_val_loss:
             best_val_loss = history.history['val_loss'][-1]
