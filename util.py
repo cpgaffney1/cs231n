@@ -143,7 +143,7 @@ def print_history(history):
         plt.savefig('Graphs/train_history')
 
 
-def print_distribution(pred , real = None):
+def print_distribution(pred, real = None):
     bins = np.linspace(0, 200, 10)
     plt.hist(pred, bins, alpha=0.5, label='Prediction')
     if(real):
