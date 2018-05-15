@@ -87,7 +87,7 @@ def train_model(model, config, numeric_data, text_data, model_folder):
 
     reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.1,
                                   patience=3, min_lr=0.0000001)
-    tensorboard = TensorBoard(log_dir='logs/', write_grads=True, write_images=True, histogram_freq=1)
+    tensorboard = TensorBoard(log_dir='logs/', write_grads=True, write_images=True)
 
     history = None
     #training loop
