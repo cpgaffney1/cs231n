@@ -186,6 +186,7 @@ def evaluate(args):
 
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
+    print(results)
 
 
 loaded_img_data = None
@@ -222,7 +223,7 @@ if __name__ == '__main__':
     command_parser = subparsers.add_parser('eval', help='evaluate model')
     command_parser.add_argument('-n', action='store', dest='name',
                                 help="load model with selected name")
-    command_parser.set_defaults(func=eval)
+    command_parser.set_defaults(func=evaluate)
 
 
     ARGS = parser.parse_args()
