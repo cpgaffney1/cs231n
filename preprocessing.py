@@ -117,6 +117,8 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
         ordered_descriptions[index] = text_data[zpid][0]
         ordered_addresses[index] = text_data[zpid][1]
         ordered_numeric_data[index] = numeric_data[zpid]
+        if index == 0:
+            print(zpid)
     imgs = np.zeros((N, desired_shape[0], desired_shape[1], desired_shape[2]), dtype=np.uint8)
     for i in range(N):
         returned_image = util.crop(img_arrays[i], shape=(desired_shape[0], desired_shape[1]))

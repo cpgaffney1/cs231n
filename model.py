@@ -1,4 +1,4 @@
-from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM
+from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, BatchNormalization
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
@@ -82,7 +82,8 @@ def build_model(config):
     #for i in range(config.n_top_hidden_layers):
     #    x = Dense(64, activation='relu')(x)
 
-    predictions = Dense(config.n_classes, activation='linear', name='main_output')(x)
+    x = BatchNormalization()(x)
+    predictions = Dense(config.n_classes, activation='softmax', name='main_output')(x)
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)

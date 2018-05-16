@@ -160,7 +160,7 @@ def print_distribution(pred, bins, real=None):
         os.makedirs('Graphs/')
         plt.savefig('Graphs/Baseline_Results')
 
-def save_file(x):
-    out = csv.writer(open("List.csv", "w"), delimiter=',', quoting=csv.QUOTE_ALL)
-    out.writerow(x)
+def save_file(x, name):
+    out = csv.writer(open(name + '.csv', "w"), delimiter=',', quoting=csv.QUOTE_ALL)
+    out.writecolumn(x)
 

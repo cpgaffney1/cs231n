@@ -4,7 +4,9 @@ from model import build_model, Config, write_model, load_model
 import os
 import sys
 import csv
-
+from PIL import Image
+from keras.optimizers import Adam
+import pickle
 
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger
 
@@ -28,17 +30,30 @@ def baseline(args):
     y_dev = util.buckets(y_dev, bins, num=n_classes)
     y_test = util.buckets(y_test, bins, num=n_classes)
 
-    reg = logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test)
+    reg = None
+    if args.resume:
+        with open('linear_model', 'rb') as pickle_file:
+            reg = pickle.load(pickle_file)
 
-def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test):
-    print('Beginning regression')
-    reg = LogisticRegression(verbose=10, multi_class='multinomial', solver='saga')
-    reg.fit(x_train, y_train)
+    logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, reg=reg)
+
+def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, reg=None):
+    if reg is None:
+        print('Beginning regression')
+        reg = LogisticRegression(verbose=10, multi_class='multinomial', solver='saga')
+        reg.fit(x_train, y_train)
+        with open('linear_model', 'wb') as pickle_file:
+            pickle.dump(reg, pickle_file)
     train_pred = reg.predict(x_train)
     dev_pred = reg.predict(x_dev)
-    with open('train_pred.csv', 'wb') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(train_pred)
+
+    print(reg.score(x_train, y_train))
+    print(reg.score(x_dev, y_dev))
+
+    np.savetxt('train_preds_linear.csv', train_pred, delimiter=',')
+    np.savetxt('train_actual_linear.csv', y_train, delimiter=',')
+    exit()
+
     util.print_distribution(train_pred, bins, real=y_train)
     util.print_distribution(dev_pred, bins, real=y_dev)
 
@@ -54,14 +69,12 @@ def train(args):
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
 
-
-
     if args.folder is not None:
         config, model = load_model(args.folder)
         model_folder = 'models/' + args.folder + '/'
     else:
-        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=1000, lr=0.0001)
+        config = Config(word_index, embedding_matrix, imagenet_weights=False, trainable_convnet_layers=20,
+                    n_classes=1000, lr=0.001)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -74,7 +87,7 @@ def train(args):
                 model_subfolders = os.listdir('models/')
                 model_folder = 'models/' + str(len(model_subfolders)) + '/'
             else:
-                model_folder = None
+                model_folder = ''
 
     bins = util.get_bins(prices, num=config.n_classes)
     train_model(model, config, numeric_data, text_data, bins, model_folder)
@@ -124,7 +137,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
     #print(util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
-    #exit()
+    #
 
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, histogram_freq=2)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
@@ -134,10 +147,11 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
     for iteration in range(n_iterations):
         print('Iteration: {}'.format(iteration))
         # start loading data
-        data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
-        data_thread.start()
+        #data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
+        #data_thread.start()
 
         # fit model on data batch
+
         history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes),
                             batch_size=config.batch_size, validation_split=0.1, epochs=1,
@@ -148,10 +162,10 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
             write_model(model, config, best_val_loss, model_folder)
 
         # retrieve new data
-        data_thread.join()
-        img_data_batch = loaded_img_data.copy()
-        numeric_data_batch = loaded_numeric_data.copy()
-        text_data_batch = loaded_descriptions.copy()
+        #data_thread.join()
+        #img_data_batch = loaded_img_data.copy()
+        #numeric_data_batch = loaded_numeric_data.copy()
+        #text_data_batch = loaded_descriptions.copy()
 
 
     util.print_history(history)
@@ -160,7 +174,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
 loaded_img_data = None
 loaded_numeric_data = None
 loaded_descriptions = None
-def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=5000):
+def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=100):
     global loaded_img_data
     global loaded_numeric_data
     global loaded_descriptions
@@ -185,9 +199,8 @@ if __name__ == '__main__':
     command_parser.set_defaults(func=train)
 
     command_parser = subparsers.add_parser('base', help='trains baseline model')
+    command_parser.add_argument('-r', '--resume', action='store_true', default=False, help="Resume")
     command_parser.set_defaults(func=baseline)
-
-
 
 
     ARGS = parser.parse_args()
