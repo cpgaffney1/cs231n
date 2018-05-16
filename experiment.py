@@ -20,8 +20,8 @@ def train(args):
         os.mkdir('models/')
 
     ## run param search and other stuff
-    x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
-    reg = logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
+    #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
+    #reg = logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
