@@ -20,8 +20,8 @@ def train(args):
         os.mkdir('models/')
 
     ## run param search and other stuff
-    #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
-    #reg = linear_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
+    x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
+    reg = logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
@@ -35,7 +35,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=1000, lr=0.001)
+                    n_classes=1000, lr=0.0001)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
