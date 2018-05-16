@@ -185,7 +185,6 @@ def evaluate(args):
     bins = util.get_bins(prices, num=config.n_classes)
 
 
-    print(numeric_data_batch[-50:])
 
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
@@ -195,7 +194,7 @@ def evaluate(args):
 loaded_img_data = None
 loaded_numeric_data = None
 loaded_descriptions = None
-def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=500):
+def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=5000):
     global loaded_img_data
     global loaded_numeric_data
     global loaded_descriptions
