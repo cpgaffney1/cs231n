@@ -82,7 +82,6 @@ def build_model(config):
     #for i in range(config.n_top_hidden_layers):
     #    x = Dense(64, activation='relu')(x)
 
-    x = BatchNormalization()(x)
     predictions = Dense(config.n_classes, activation='softmax', name='main_output')(x)
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
