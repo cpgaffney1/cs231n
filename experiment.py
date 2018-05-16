@@ -35,7 +35,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=1000, lr=0.0001)
+                    n_classes=1000, lr=0.001)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -102,6 +102,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
+    #print(util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
+    #exit()
 
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, histogram_freq=2)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
