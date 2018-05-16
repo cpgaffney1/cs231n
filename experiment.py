@@ -1,27 +1,53 @@
 import numpy as np
 from threading import Thread
-from keras.models import Sequential
-from sklearn import linear_model as sklm
-import util
 from model import build_model, Config, write_model, load_model
 import os
 import sys
-import pickle
-import argparse
-import preprocessing
+import csv
+
 
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger
 
+from sklearn.linear_model import LogisticRegression
+
+import argparse
+import util
+
+import preprocessing
+
 num_data_files = 50
 n_iterations = 1000
+
+def baseline(args):
+    n_classes = 1000
+    _, _, prices = preprocessing.load_tabular_data()
+    bins = util.get_bins(prices, num=n_classes)
+    x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
+
+    y_train = util.buckets(y_train, bins, num=n_classes)
+    y_dev = util.buckets(y_dev, bins, num=n_classes)
+    y_test = util.buckets(y_test, bins, num=n_classes)
+
+    reg = logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test)
+
+def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test):
+    print('Beginning regression')
+    reg = LogisticRegression(verbose=10, multi_class='multinomial', solver='saga')
+    reg.fit(x_train, y_train)
+    train_pred = reg.predict(x_train)
+    dev_pred = reg.predict(x_dev)
+    with open('train_pred.csv', 'wb') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        wr.writerow(train_pred)
+    util.print_distribution(train_pred, bins, real=y_train)
+    util.print_distribution(dev_pred, bins, real=y_dev)
+
 
 def train(args):
     if not os.path.exists('models/'):
         os.mkdir('models/')
 
     ## run param search and other stuff
-    #x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
-    #reg = logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test)
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
@@ -80,11 +106,6 @@ def optimize_params(word_index, embedding_matrix, n_trials=1000):
         model = build_model(config)
         train_model(model, config, numeric_data, text_data, ) '''
 
-
-def logistic_regression(x_train, y_train, x_dev, y_dev, x_test, y_test):
-    reg = sklm.logistic_regression_path()
-    reg.fit(x_train, y_train)
-    return reg
 
 def train_model(model, config, numeric_data, text_data, bins, model_folder):
     best_val_loss = float('inf')
@@ -162,6 +183,10 @@ if __name__ == '__main__':
                                 help="Save models to folder with designated name")
     command_parser.add_argument('-r', action='store', dest='folder', help="Resume training with existing model. Input a model folder name")
     command_parser.set_defaults(func=train)
+
+    command_parser = subparsers.add_parser('base', help='trains baseline model')
+    command_parser.set_defaults(func=baseline)
+
 
 
 

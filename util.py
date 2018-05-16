@@ -146,10 +146,9 @@ def print_history(history):
         plt.savefig('Graphs/train_history')
 
 
-def print_distribution(pred, real=None):
-    bins = np.linspace(0, 200, 10)
+def print_distribution(pred, bins, real=None):
     plt.hist(pred, bins, alpha=0.5, label='Prediction')
-    if(real):
+    if real is not None:
         plt.hist(real, bins, alpha=0.5, label='Real')
     plt.legend(loc='upper right')
     plt.title('Baseline Results')
