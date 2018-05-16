@@ -4,6 +4,7 @@ import os
 import sys
 import re
 import matplotlib.pyplot as plt
+import csv
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
@@ -158,3 +159,8 @@ def print_distribution(pred, bins, real=None):
     else:
         os.makedirs('Graphs/')
         plt.savefig('Graphs/Baseline_Results')
+
+def save_file(x):
+    out = csv.writer(open("List.csv", "w"), delimiter=',', quoting=csv.QUOTE_ALL)
+    out.writerow(x)
+
