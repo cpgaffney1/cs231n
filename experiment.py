@@ -184,6 +184,9 @@ def evaluate(args):
 
     bins = util.get_bins(prices, num=config.n_classes)
 
+
+    print(numeric_data_batch[-50:])
+
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
     print(results)
