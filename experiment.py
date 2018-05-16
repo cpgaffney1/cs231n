@@ -3,6 +3,7 @@ from threading import Thread
 from model import build_model, Config, write_model, load_model
 import os
 import sys
+import keras.backend as K
 import csv
 from PIL import Image
 from keras.optimizers import Adam
@@ -19,6 +20,8 @@ import preprocessing
 
 num_data_files = 50
 n_iterations = 1000
+TRAIN_PHASE = 0
+TEST_PHASE = 1
 
 def baseline(args):
     n_classes = 1000
@@ -74,7 +77,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=1000, lr=0.001)
+                    n_classes=1000, lr=0.01)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -184,10 +187,10 @@ def evaluate(args):
 
     bins = util.get_bins(prices, num=config.n_classes)
 
-
-
+    K.set_learning_phase(TEST_PHASE)
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
-                            util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
+                            util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes),
+                             batch_size=config.batch_size)
     print(results)
 
 
