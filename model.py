@@ -94,22 +94,14 @@ def build_model(config):
 import os
 import pickle
 def write_model(model, config, best_val_loss, model_folder):
-    try:
-        os.mkdir(model_folder + 'val_loss_{}/'.format(best_val_loss))
-    except:
-        print('unable to create dir')
-        return
-    model.save(model_folder + 'val_loss_{}/model.h5'.format(best_val_loss))
-    with open(model_folder + 'val_loss_{}/config'.format(best_val_loss), 'wb') as pickle_file:
+    model.save(model_folder + 'model.h5'.format(best_val_loss))
+    with open(model_folder + 'config'.format(best_val_loss), 'wb') as pickle_file:
         pickle.dump(config, pickle_file)
 
 
 from keras.models import load_model as load_keras_model
 def load_model(model_folder):
     path = 'models/' + model_folder + '/'
-    subfolders = os.listdir(path)
-    val_losses = [float(folder[9:]) for folder in subfolders]
-    path = path + 'val_loss_' + str(min(val_losses)) + '/'
     model = load_keras_model(path + 'model.h5')
     with open(path + 'config') as pickle_file:
         config = pickle.load(pickle_file)
