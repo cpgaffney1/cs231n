@@ -157,6 +157,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
                             batch_size=config.batch_size, validation_split=0.1, epochs=1,
                             callbacks=[tensorboard, csvlogger])
 
+
         if history.history['val_loss'][-1] < best_val_loss:
             best_val_loss = history.history['val_loss'][-1]
             write_model(model, config, best_val_loss, model_folder)
@@ -169,6 +170,22 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
 
 
     util.print_history(history)
+
+
+def evaluate(args):
+    config, model = load_model(args.name)
+
+    img_files = os.listdir('imgs/')
+    numeric_data, text_data, prices = preprocessing.load_tabular_data()
+    load_data_batch(img_files, numeric_data, text_data, img_shape=config.img_shape)
+    img_data_batch = loaded_img_data.copy()
+    numeric_data_batch = loaded_numeric_data.copy()
+    text_data_batch = loaded_descriptions.copy()
+
+    bins = util.get_bins(prices, num=config.n_classes)
+
+    results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
+                            util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
 
 
 loaded_img_data = None
@@ -200,6 +217,11 @@ if __name__ == '__main__':
 
     command_parser = subparsers.add_parser('base', help='trains baseline model')
     command_parser.add_argument('-r', '--resume', action='store_true', default=False, help="Resume")
+    command_parser.set_defaults(func=baseline)
+
+    command_parser = subparsers.add_parser('eval', help='evaluate model')
+    command_parser.add_argument('-n', action='store', dest='name',
+                                help="load model with selected name")
     command_parser.set_defaults(func=baseline)
 
 
