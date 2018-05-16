@@ -28,6 +28,8 @@ def train(args):
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
 
+
+
     if args.folder is not None:
         config, model = load_model(args.folder)
         model_folder = 'models/' + args.folder + '/'
@@ -35,15 +37,18 @@ def train(args):
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
                     n_classes=1000, lr=0.0001)
         model = build_model(config)
-        if os.path.exists('models/' + args.name):
-            print('A folder with that name already exists.')
-            exit()
         if args.name is not None:
+            if os.path.exists('models/' + args.name):
+                print('A folder with that name already exists.')
+                exit()
             os.mkdir('models/' + args.name)
             model_folder = 'models/' + args.name + '/'
         else:
-            model_subfolders = os.listdir('models/')
-            model_folder = 'models/' + str(len(model_subfolders)) + '/'
+            if not args.test:
+                model_subfolders = os.listdir('models/')
+                model_folder = 'models/' + str(len(model_subfolders)) + '/'
+            else:
+                model_folder = None
 
     bins = util.get_bins(prices, num=config.n_classes)
     train_model(model, config, numeric_data, text_data, bins, model_folder)
@@ -97,6 +102,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
+
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, histogram_freq=2)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
 
@@ -149,6 +155,7 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers()
 
     command_parser = subparsers.add_parser('train', help='trains model')
+    command_parser.add_argument('-t', '--test', action='store_true', default=False, help="Run but save nothing. Used for testing code")
     command_parser.add_argument('-n', action='store', dest='name',
                                 help="Save models to folder with designated name")
     command_parser.add_argument('-r', action='store', dest='folder', help="Resume training with existing model. Input a model folder name")
