@@ -103,7 +103,7 @@ from keras.models import load_model as load_keras_model
 def load_model(model_folder):
     path = 'models/' + model_folder + '/'
     model = load_keras_model(path + 'model.h5')
-    with open(path + 'config') as pickle_file:
+    with open(path + 'config', 'rb') as pickle_file:
         config = pickle.load(pickle_file)
     return config, model
 
