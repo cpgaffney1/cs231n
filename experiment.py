@@ -67,6 +67,9 @@ def train(args):
     if not os.path.exists('models/'):
         os.mkdir('models/')
 
+    K.clear_session()
+    K.set_learning_phase(TEST_PHASE)
+
     ## run param search and other stuff
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
@@ -157,18 +160,11 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
 
         # fit model on data batch
         validation_cutoff = int(0.9 * len(img_data_batch))
-        model.save('temp.h5')
-        K.clear_session()
-        K.set_learning_phase(TRAIN_PHASE)
-        model = load_keras_model('temp.h5')
         history = model.fit([numeric_data_batch[:validation_cutoff, 1:3], img_data_batch[:validation_cutoff]],
                             util.buckets(numeric_data_batch[:validation_cutoff, 3], bins, num=config.n_classes),
                             batch_size=config.batch_size, epochs=1,
                             callbacks=[tensorboard, csvlogger])
-        model.save('temp.h5')
-        K.clear_session()
-        K.set_learning_phase(TEST_PHASE)
-        model = load_keras_model('temp.h5')
+
         results = model.evaluate([numeric_data_batch[validation_cutoff:, 1:3], img_data_batch[validation_cutoff:]],
                                  util.buckets(numeric_data_batch[validation_cutoff:, 3], bins, num=config.n_classes).astype(int),
                                  batch_size=config.batch_size)
