@@ -82,7 +82,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=1000, lr=0.001)
+                    n_classes=1000, lr=0.01)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -155,31 +155,25 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
     for iteration in range(n_iterations):
         print('Iteration: {}'.format(iteration))
         # start loading data
-        data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
-        data_thread.start()
+        #data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
+        #data_thread.start()
 
         # fit model on data batch
-        validation_cutoff = int(0.9 * len(img_data_batch))
-        history = model.fit([numeric_data_batch[:validation_cutoff, 1:3], img_data_batch[:validation_cutoff]],
-                            util.buckets(numeric_data_batch[:validation_cutoff, 3], bins, num=config.n_classes),
-                            batch_size=config.batch_size, epochs=1,
+        history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
+                            util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes),
+                            batch_size=config.batch_size, epochs=1, validation_split=0.1,
                             callbacks=[tensorboard, csvlogger])
 
-        results = model.evaluate([numeric_data_batch[validation_cutoff:, 1:3], img_data_batch[validation_cutoff:]],
-                                 util.buckets(numeric_data_batch[validation_cutoff:, 3], bins, num=config.n_classes).astype(int),
-                                 batch_size=config.batch_size)
-        print(results)
 
-
-        if results[1] < best_val_loss:
-            best_val_loss = results[1]
+        if history.history['val_loss'][1] < best_val_loss:
+            best_val_loss = history.history['val_loss'][1]
             write_model(model, config, best_val_loss, model_folder)
 
         # retrieve new data
-        data_thread.join()
-        img_data_batch = loaded_img_data.copy()
-        numeric_data_batch = loaded_numeric_data.copy()
-        text_data_batch = loaded_descriptions.copy()
+        #data_thread.join()
+        #img_data_batch = loaded_img_data.copy()
+        #numeric_data_batch = loaded_numeric_data.copy()
+        #text_data_batch = loaded_descriptions.copy()
 
 
     util.print_history(history)
