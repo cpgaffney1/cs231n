@@ -1,4 +1,4 @@
-from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, BatchNormalization
+from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet

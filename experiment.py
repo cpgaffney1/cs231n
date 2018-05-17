@@ -189,7 +189,7 @@ def evaluate(args):
 
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes).astype(int),
-                            batch_size=config.batch_size)
+                            batch_size=len(numeric_data_batch))
     print(results)
 
 
