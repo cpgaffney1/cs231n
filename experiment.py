@@ -147,7 +147,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
     #print(util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
     #
 
-    tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, histogram_freq=2)
+    tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
 
     history = None
