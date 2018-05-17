@@ -160,6 +160,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
         #data_thread.start()
 
         # fit model on data batch
+        img_data_batch = img_data_batch.astype(np.float32)
         img_data_batch = preprocess_input(img_data_batch)
         history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes),
