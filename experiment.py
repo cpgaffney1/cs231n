@@ -176,7 +176,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
 
 
 def evaluate(args):
-    config, model = load_model(args.name)
+    config, _ = load_model(args.name)
 
     img_files = os.listdir('imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
@@ -187,10 +187,39 @@ def evaluate(args):
 
     bins = util.get_bins(prices, num=config.n_classes)
 
+
+    # In every test we will clear the session and reload the model to force Learning_Phase values to change.
+    print('DYNAMIC LEARNING_PHASE')
+    K.clear_session()
+    config, model = load_model(args.name)
+    # This accuracy should match exactly the one of the validation set on the last iteration.
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
-                            util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes).astype(int),
-                            batch_size=len(numeric_data_batch))
+                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes).astype(int),
+                             batch_size=config.batch_size)
     print(results)
+
+
+    print('STATIC LEARNING_PHASE = 0')
+    K.clear_session()
+    K.set_learning_phase(0)
+    config, model = load_model(args.name)
+    # Again the accuracy should match the above.
+    results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
+                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes).astype(int),
+                             batch_size=config.batch_size)
+    print(results)
+
+
+    print('STATIC LEARNING_PHASE = 1')
+    K.clear_session()
+    K.set_learning_phase(1)
+    config, model = load_model(args.name)
+    # The accuracy will be close to the one of the training set on the last iteration.
+    results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
+                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes).astype(int),
+                             batch_size=config.batch_size)
+    print(results)
+
 
 
 loaded_img_data = None
