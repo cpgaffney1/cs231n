@@ -168,8 +168,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
                             callbacks=[tensorboard, csvlogger])
 
 
-        if history.history['val_loss'][1] < best_val_loss:
-            best_val_loss = history.history['val_loss'][1]
+        if history.history['val_loss'] < best_val_loss:
+            best_val_loss = history.history['val_loss']
             write_model(model, config, best_val_loss, model_folder)
 
         # retrieve new data
