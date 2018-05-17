@@ -187,10 +187,10 @@ def evaluate(args):
 
     bins = util.get_bins(prices, num=config.n_classes)
 
-    K.set_learning_phase(TEST_PHASE)
+    K.set_learning_phase(0)
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes),
-                             batch_size=config.batch_size)
+                            batch_size=config.batch_size)
     print(results)
 
 
