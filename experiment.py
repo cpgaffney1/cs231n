@@ -68,8 +68,8 @@ def train(args):
     if not os.path.exists('models/'):
         os.mkdir('models/')
 
-    K.clear_session()
-    K.set_learning_phase(TEST_PHASE)
+    #K.clear_session()
+    #K.set_learning_phase(TEST_PHASE)
 
     ## run param search and other stuff
 
@@ -194,8 +194,8 @@ def evaluate(args):
 
     bins = util.get_bins(prices, num=config.n_classes)
 
-    K.clear_session()
-    K.set_learning_phase(TEST_PHASE)
+    #K.clear_session()
+    #K.set_learning_phase(TEST_PHASE)
     config, model = load_model(args.name)
     # The accuracy will be close to the one of the training set on the last iteration.
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
