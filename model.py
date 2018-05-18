@@ -14,7 +14,7 @@ class Config:
     embed_dim = 50
     max_seq_len = 30
     def __init__(self, word_index, embedding_matrix, lr=0.001, n_recurrent_layers=2, n_numeric_layers=1,
-                 trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=1, n_convnet_fc_layers=3,
+                 trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=1, n_convnet_fc_layers=2,
                  n_classes=1000, drop_prob=0.0):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
@@ -34,6 +34,7 @@ class Config:
 def build_model(config):
     numeric_inputs = Input(shape=(config.numeric_input_size,))
     img_inputs = Input(shape=config.img_shape)
+
     #text_inputs = Input(shape=config.text_shape)
 
     #running cnn
@@ -52,16 +53,18 @@ def build_model(config):
 
     cnn_out = image_model(img_inputs)
     cnn_out = Flatten()(cnn_out)
-    x = Dense(128, activation='relu')(cnn_out)
+    x = Dense(2048, activation='relu')(cnn_out)
     for i in range(config.n_convnet_fc_layers):
-        x = Dense(64, activation='relu')(x)
+        x = Dense(1024, activation='relu')(x)
     cnn_out = x
 
     #running fc
+    '''
     x = Dense(64, activation='relu')(numeric_inputs)
     for i in range(config.n_numeric_layers - 1):
         x = Dense(64, activation='relu')(x)
     fc_out = x
+    '''
     #running RNN
     '''embedding_layer = Embedding(len(config.word_index) + 1, config.embed_dim,
                                 weights=[config.embedding_matrix],
@@ -76,7 +79,7 @@ def build_model(config):
     # to top layer of text network
 
     #concat them
-    x = concatenate([cnn_out, fc_out])#, rnn_out])
+    #x = concatenate([cnn_out, fc_out])#, rnn_out])
 
     #Final Fc
     #for i in range(config.n_top_hidden_layers):
