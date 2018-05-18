@@ -83,7 +83,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=1000, lr=0.001)
+                    n_classes=100, lr=0.001)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -208,7 +208,7 @@ def evaluate(args):
 loaded_img_data = None
 loaded_numeric_data = None
 loaded_descriptions = None
-def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=5000):
+def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=100):
     global loaded_img_data
     global loaded_numeric_data
     global loaded_descriptions
