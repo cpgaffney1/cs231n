@@ -145,7 +145,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
     #print(util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
     #
 
-    tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True)
+    tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, write_grads=True)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
 
     history = None
@@ -160,7 +160,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
         img_data_batch = img_data_batch.astype(np.float32)
         img_data_batch = preprocess_input(img_data_batch)
         history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
-                            util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes),
+                            util.buckets(numeric_data_batch[:, 3], bins),
                             batch_size=config.batch_size, epochs=1, validation_split=0.1,
                             callbacks=[tensorboard, csvlogger])
 
@@ -196,7 +196,7 @@ def evaluate(args):
     config, model = load_model(args.name)
     # The accuracy will be close to the one of the training set on the last iteration.
     results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
-                             util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes).astype(int),
+                             util.buckets(numeric_data_batch[:, 3], bins).astype(int),
                              batch_size=config.batch_size)
     print(results)
 

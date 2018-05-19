@@ -66,7 +66,7 @@ def crop(image, shape=(299, 299), random=False):
     return new_img
 
 
-def buckets(x, bins, num=1000):
+def buckets(x, bins):
     y = np.digitize(x, bins, right=True)
     return y
 
