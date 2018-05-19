@@ -80,7 +80,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=100, lr=0.001)
+                    n_classes=100, lr=0.0001)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -161,7 +161,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
         img_data_batch = preprocess_input(img_data_batch)
         history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
                             util.buckets(numeric_data_batch[:, 3], bins),
-                            batch_size=config.batch_size, epochs=1, validation_split=0.1,
+                            batch_size=config.batch_size, epochs=1000, validation_split=0.1,
                             callbacks=[tensorboard, csvlogger])
 
 
