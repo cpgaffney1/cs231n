@@ -79,7 +79,7 @@ def train(args):
         config, model = load_model(args.folder)
         model_folder = 'models/' + args.folder + '/'
     else:
-        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
+        config = Config(word_index, embedding_matrix, imagenet_weights=False, trainable_convnet_layers=20,
                     n_classes=100, lr=0.0001)
         model = build_model(config)
         if args.name is not None:
