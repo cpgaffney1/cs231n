@@ -3,13 +3,10 @@ from threading import Thread
 from model import build_model, Config, write_model, load_model
 import os
 import sys
-import keras.backend as K
 import csv
 from PIL import Image
-from keras.optimizers import Adam
 import pickle
 from keras.applications.xception import preprocess_input
-from keras.models import load_model as load_keras_model
 
 
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger
