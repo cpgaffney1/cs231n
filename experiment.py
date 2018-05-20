@@ -140,13 +140,13 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
 
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, write_grads=True)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
-    saver = ModelCheckpoint(model_folder, monitor='val_sparse_categorical_accuracy', save_best_only=True, mode='max')
+    saver = ModelCheckpoint(model_folder + 'model', monitor='val_sparse_categorical_accuracy', save_best_only=True, mode='max')
 
     history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size),
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
                                   validation_data=util.generator(
                                       val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'
-                                  ), steps_per_epoch=int(50000/config.batch_size), validation_steps=int(4500/config.batch_size))
+                                  ), steps_per_epoch=int(40000/config.batch_size), validation_steps=int(4500/config.batch_size))
 
 def evaluate(args):
     config, model = load_model(args.name)
