@@ -146,7 +146,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
                                   validation_data=util.generator(
                                       val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'
-                                  ))
+                                  ), steps_per_epoch=int(50000/config.batch_size))
 
 def evaluate(args):
     config, model = load_model(args.name)
@@ -159,11 +159,11 @@ def evaluate(args):
     bins = util.get_bins(prices, num=config.n_classes)
 
     results = model.evaluate_generator(util.generator(
-        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'))
+        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'), steps_per_epoch=int(50000/config.batch_size))
     print(results)
 
     results = model.evaluate_generator(util.generator(
-        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='test'))
+        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='test'), steps_per_epoch=int(50000/config.batch_size))
     print(results)
 
 
