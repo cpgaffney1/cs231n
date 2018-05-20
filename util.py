@@ -5,7 +5,9 @@ import sys
 import re
 import matplotlib.pyplot as plt
 import csv
+import preprocessing
 
+from keras.applications.xception import preprocess_input
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 
@@ -163,3 +165,18 @@ def print_distribution(pred, bins, real=None):
 def save_file(x, name):
     out = csv.writer(open(name + '.csv', "w"), delimiter=',', quoting=csv.QUOTE_ALL)
     out.writecolumn(x)
+
+def load_data_batch(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
+                    verbose=False, batch_size=5000, mode='train'):
+    img_data_batch, numeric_data_batch, descriptions_batch, addresses_batch = \
+        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size, replace=False),
+                                         text_data, numeric_data, desired_shape=img_shape, verbose=verbose, mode=mode)
+    img_data_batch = img_data_batch.astype(np.float32)
+    img_data_batch = preprocess_input(img_data_batch)
+    return [numeric_data_batch[:, 1:3], img_data_batch], buckets(numeric_data_batch[:, 3], bins)
+
+def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
+              verbose=False, batch_size=5000, mode='train'):
+    while True:
+        yield load_data_batch(img_files, numeric_data, text_data, bins,
+                              img_shape=img_shape, verbose=verbose, batch_size=batch_size, mode=mode)

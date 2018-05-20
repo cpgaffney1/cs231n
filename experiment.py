@@ -6,10 +6,9 @@ import sys
 import csv
 from PIL import Image
 import pickle
-from keras.applications.xception import preprocess_input
 
 
-from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger
+from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger, ModelCheckpoint
 
 from sklearn.linear_model import LogisticRegression
 
@@ -80,7 +79,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=20,
-                    n_classes=100, lr=0.0001)
+                    n_classes=1000, lr=0.0001)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -132,90 +131,40 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
     global loaded_numeric_data
     global loaded_descriptions
 
-    img_files = os.listdir('imgs/')
-
-    #load initial data
-    load_data_batch(img_files, numeric_data, text_data, img_shape=config.img_shape)
-    img_data_batch = loaded_img_data.copy()
-    numeric_data_batch = loaded_numeric_data.copy()
-    text_data_batch = loaded_descriptions.copy()
+    train_img_files = os.listdir('imgs/')
+    val_img_files = os.listdir('val_imgs/')
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
-    #print(util.buckets(numeric_data_batch[:, 3], bins, num=config.n_classes))
-    #
+
 
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, write_grads=True)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
+    saver = ModelCheckpoint(model_folder, monitor='val_sparse_categorical_accuracy', save_best_only=True, mode='max')
 
-    history = None
-    #training loop
-    for iteration in range(n_iterations):
-        print('Iteration: {}'.format(iteration))
-        # start loading data
-        #data_thread = Thread(target=load_data_batch, args=(img_files, numeric_data, text_data, config.img_shape, False))
-        #data_thread.start()
-
-        # fit model on data batch
-        img_data_batch = img_data_batch.astype(np.float32)
-        img_data_batch = preprocess_input(img_data_batch)
-        history = model.fit([numeric_data_batch[:, 1:3], img_data_batch],
-                            util.buckets(numeric_data_batch[:, 3], bins),
-                            batch_size=config.batch_size, epochs=1000, validation_split=0.1,
-                            callbacks=[tensorboard, csvlogger])
-
-
-        if history.history['val_loss'][-1] < best_val_loss:
-            best_val_loss = history.history['val_loss'][-1]
-            write_model(model, config, best_val_loss, model_folder)
-
-        # retrieve new data
-        #data_thread.join()
-        #img_data_batch = loaded_img_data.copy()
-        #numeric_data_batch = loaded_numeric_data.copy()
-        #text_data_batch = loaded_descriptions.copy()
-
-
-    util.print_history(history)
-
+    history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=5000),
+                                  epochs=100, callbacks=[tensorboard, csvlogger, saver],
+                                  validation_data=util.generator(
+                                      val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=5000, mode='val'
+                                  ))
 
 def evaluate(args):
-    config, _ = load_model(args.name)
+    config, model = load_model(args.name)
 
-    img_files = os.listdir('imgs/')
+    val_img_files = os.listdir('val_imgs/')
+    test_img_files = os.listdir('test_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
-    load_data_batch(img_files, numeric_data, text_data, img_shape=config.img_shape, batch_size=500)
-    img_data_batch = loaded_img_data.copy()
-    numeric_data_batch = loaded_numeric_data.copy()
-    text_data_batch = loaded_descriptions.copy()
+
 
     bins = util.get_bins(prices, num=config.n_classes)
 
-    #K.clear_session()
-    #K.set_learning_phase(TEST_PHASE)
-    config, model = load_model(args.name)
-    # The accuracy will be close to the one of the training set on the last iteration.
-    results = model.evaluate([numeric_data_batch[:, 1:3], img_data_batch],
-                             util.buckets(numeric_data_batch[:, 3], bins).astype(int),
-                             batch_size=config.batch_size)
+    results = model.evaluate_generator(util.generator(
+        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=5000, mode='val'))
     print(results)
 
-
-
-loaded_img_data = None
-loaded_numeric_data = None
-loaded_descriptions = None
-def load_data_batch(img_files, numeric_data, text_data, img_shape=(299,299,3), verbose=True, batch_size=5000):
-    global loaded_img_data
-    global loaded_numeric_data
-    global loaded_descriptions
-    loaded_img_data, loaded_numeric_data, loaded_descriptions, addresses = \
-        preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size, replace=False), text_data, numeric_data,
-                                         desired_shape=img_shape, verbose=verbose)
-
-
-    #loaded_img_data = np.load('data/img_data{}.npy'.format(index))
-    #loaded_numeric_data = np.load('data/numeric_data{}.npy'.format(index))
+    results = model.evaluate_generator(util.generator(
+        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=5000, mode='test'))
+    print(results)
 
 
 

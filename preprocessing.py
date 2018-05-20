@@ -63,7 +63,7 @@ def process_data_batch_and_write(batchnum, filenames, text_data, numeric_data):
         for y in ordered_addresses:
             of.write('{}\n'.format(repr(y[1:-1])))
 
-def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,299,3), verbose=True):
+def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,299,3), verbose=True, mode='train'):
     i = 0
     img_arrays = []
     x_shapes = []
@@ -82,7 +82,12 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
                 sys.stdout.flush()
         count += 1
         try:
-            img = Image.open('imgs/' + file)
+            folder = 'imgs/'
+            if mode == 'val':
+                folder = mode + '_' + folder
+            if mode == 'test':
+                folder = mode + '_' + folder
+            img = Image.open(folder + file)
         except OSError:
             continue
         data = np.array(img)
