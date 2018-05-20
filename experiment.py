@@ -142,10 +142,10 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
     saver = ModelCheckpoint(model_folder, monitor='val_sparse_categorical_accuracy', save_best_only=True, mode='max')
 
-    history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=5000),
+    history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size),
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
                                   validation_data=util.generator(
-                                      val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=5000, mode='val'
+                                      val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'
                                   ))
 
 def evaluate(args):
@@ -159,11 +159,11 @@ def evaluate(args):
     bins = util.get_bins(prices, num=config.n_classes)
 
     results = model.evaluate_generator(util.generator(
-        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=5000, mode='val'))
+        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'))
     print(results)
 
     results = model.evaluate_generator(util.generator(
-        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=5000, mode='test'))
+        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='test'))
     print(results)
 
 
