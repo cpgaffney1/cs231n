@@ -125,7 +125,7 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
 
     imgs = np.zeros((N, desired_shape[0], desired_shape[1], desired_shape[2]), dtype=np.uint8)
     for i in range(N):
-        returned_image = util.crop(img_arrays[i], shape=(desired_shape[0], desired_shape[1]))
+        returned_image = util.crop(img_arrays[i], shape=(desired_shape[0], desired_shape[1]), random=True)
         imgs[i] = returned_image
         '''img = Image.fromarray(imgs[i], 'RGB')
         img.save('img.jpg')

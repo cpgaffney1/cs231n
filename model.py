@@ -1,10 +1,11 @@
-from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM
+from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, Dropout
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet50 import ResNet50
 from keras.optimizers import Adam
 from keras.layers import Embedding
+import keras.regularizers as regularizers
 
 class Config:
     numeric_input_size = 2
@@ -15,7 +16,7 @@ class Config:
     max_seq_len = 30
     def __init__(self, word_index, embedding_matrix, lr=0.001, n_recurrent_layers=2, n_numeric_layers=1,
                  trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=1, n_convnet_fc_layers=2,
-                 n_classes=1000, drop_prob=0.0):
+                 n_classes=1000, drop_prob=0.5, reg_weight=0.01):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
         self.vocab_size = len(word_index)
@@ -30,6 +31,7 @@ class Config:
         self.n_convnet_fc_layers = n_convnet_fc_layers
         self.n_classes = n_classes
         self.drop_prob = drop_prob
+        self.reg_weight = reg_weight
 
 def build_model(config):
     numeric_inputs = Input(shape=(config.numeric_input_size,))
@@ -51,16 +53,17 @@ def build_model(config):
 
     cnn_out = image_model.output
     cnn_out = Flatten()(cnn_out)
-    x = Dense(1024, activation='relu')(cnn_out)
+    x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(cnn_out)
     for i in range(config.n_convnet_fc_layers):
-        x = Dense(256, activation='relu')(x)
+        x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+    x = Dropout(config.drop_prob)(x)
     cnn_out = x
 
     #running fc
     '''
-    x = Dense(64, activation='relu')(numeric_inputs)
+    x = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(numeric_inputs)
     for i in range(config.n_numeric_layers - 1):
-        x = Dense(64, activation='relu')(x)
+        x = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     fc_out = x
     '''
     #running RNN
@@ -69,9 +72,9 @@ def build_model(config):
                                 input_length=config.max_seq_len,
                                 trainable=False)
     embedded_seqs = embedding_layer(text_inputs)
-    lstm = LSTM(128)(embedded_seqs)
+    lstm = LSTM(64)(embedded_seqs)
     for i in range(config.n_recurrent_layers - 1):
-        lstm = LSTM(64)(lstm)
+        lstm = LSTM(32)(lstm)
     rnn_out = lstm'''
     #rnn_out
     # to top layer of text network
@@ -83,7 +86,7 @@ def build_model(config):
     #for i in range(config.n_top_hidden_layers):
     #    x = Dense(64, activation='relu')(x)
 
-    predictions = Dense(config.n_classes, activation='softmax', name='main_output')(x)
+    predictions = Dense(config.n_classes, activation='softmax', name='main_output', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
