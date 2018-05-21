@@ -7,6 +7,7 @@ from keras.optimizers import Adam
 from keras.layers import Embedding
 import keras.regularizers as regularizers
 
+
 class Config:
     numeric_input_size = 2
     img_shape = (224,224,3)

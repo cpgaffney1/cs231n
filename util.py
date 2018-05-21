@@ -10,6 +10,8 @@ import preprocessing
 from keras.applications.xception import preprocess_input
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.image import ImageDataGenerator
+
 
 
 def shuffle_in_parallel(arr1, arr2):
@@ -178,5 +180,17 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
               verbose=False, batch_size=32, mode='train'):
     while True:
-        yield load_data_batch(img_files, numeric_data, text_data, bins,
+        x, y = load_data_batch(img_files, numeric_data, text_data, bins,
                               img_shape=img_shape, verbose=verbose, batch_size=batch_size, mode=mode)
+        imgs = x[1]
+        datagen = ImageDataGenerator(
+            featurewise_center=True,
+            featurewise_std_normalization=True,
+            rotation_range=20,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            horizontal_flip=True)
+        datagen.fit(imgs)
+        for i in range(1):
+            imgs, y = datagen.flow(imgs, y, batch_size=batch_size)
+        yield [x[0], imgs], y
