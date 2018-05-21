@@ -187,10 +187,9 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             featurewise_center=True,
             featurewise_std_normalization=True,
             rotation_range=20,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
             horizontal_flip=True)
         datagen.fit(imgs)
         for i in range(1):
-            imgs, y = datagen.flow(imgs, y, batch_size=batch_size)
+            ret = datagen.flow(imgs, y, batch_size=batch_size)
+            print(ret)
         yield [x[0], imgs], y
