@@ -192,4 +192,5 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         for i in range(1):
             ret = datagen.flow(imgs, y, batch_size=batch_size)
             print(ret)
+            exit()
         yield [x[0], imgs], y
