@@ -189,8 +189,6 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             rotation_range=20,
             horizontal_flip=True)
         datagen.fit(imgs)
-        for i in range(1):
-            ret = datagen.flow(imgs, y, batch_size=batch_size)
-            print(ret)
-            exit()
+        for imgs, y in datagen.flow(imgs, y, batch_size=batch_size):
+            break
         yield [x[0], imgs], y
