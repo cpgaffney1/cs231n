@@ -184,8 +184,6 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
                               img_shape=img_shape, verbose=verbose, batch_size=batch_size, mode=mode)
         imgs = x[1]
         datagen = ImageDataGenerator(
-            featurewise_center=True,
-            featurewise_std_normalization=True,
             rotation_range=20,
             horizontal_flip=True)
         datagen.fit(imgs)

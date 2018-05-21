@@ -23,14 +23,14 @@ TRAIN_PHASE = 0
 TEST_PHASE = 1
 
 def baseline(args):
-    n_classes = 1000
+    n_classes = 100
     _, _, prices = preprocessing.load_tabular_data()
     bins = util.get_bins(prices, num=n_classes)
     x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
 
-    y_train = util.buckets(y_train, bins, num=n_classes)
-    y_dev = util.buckets(y_dev, bins, num=n_classes)
-    y_test = util.buckets(y_test, bins, num=n_classes)
+    y_train = util.buckets(y_train, bins)
+    y_dev = util.buckets(y_dev, bins)
+    y_test = util.buckets(y_test, bins)
 
     reg = None
     if args.resume:

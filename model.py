@@ -62,9 +62,9 @@ def build_model(config):
 
     #running fc
     '''
-    x = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(numeric_inputs)
+    x = Dense(32, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(numeric_inputs)
     for i in range(config.n_numeric_layers - 1):
-        x = Dense(64, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+        x = Dense(16, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     fc_out = x
     '''
     #running RNN
@@ -82,10 +82,6 @@ def build_model(config):
 
     #concat them
     #x = concatenate([cnn_out, fc_out])#, rnn_out])
-
-    #Final Fc
-    #for i in range(config.n_top_hidden_layers):
-    #    x = Dense(64, activation='relu')(x)
 
     predictions = Dense(config.n_classes, activation='softmax', name='main_output', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
 
