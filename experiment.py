@@ -168,11 +168,13 @@ def evaluate(args):
     bins = util.get_bins(prices, num=config.n_classes)
 
     results = model.evaluate_generator(util.generator(
-        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'), steps_per_epoch=int(4500/config.batch_size))
+        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
+        batch_size=config.batch_size, mode='val'), steps_per_epoch=int(4500/config.batch_size))
     print(results)
 
     results = model.evaluate_generator(util.generator(
-        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='test'), steps_per_epoch=int(5000/config.batch_size))
+        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
+        batch_size=config.batch_size, mode='test'), steps_per_epoch=int(5000/config.batch_size))
     print(results)
 
 
