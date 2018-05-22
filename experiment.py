@@ -74,12 +74,21 @@ def train(args):
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
 
+    if args.trainable_layers is None:
+        trainable_convnet_layers = 20
+    else:
+        trainable_convnet_layers = int(args.trainable_layers)
+    if args.reg_weight is None:
+        reg_weight = 0.01
+    else:
+        reg_weight = float(args.reg_weight)
+
     if args.folder is not None:
         config, model = load_model(args.folder)
         model_folder = 'models/' + args.folder + '/'
     else:
-        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=10,
-                    n_classes=100, lr=0.0001)
+        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
+                    n_classes=100, lr=0.0001, reg_weight=reg_weight)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -178,6 +187,10 @@ if __name__ == '__main__':
     command_parser.add_argument('-n', action='store', dest='name',
                                 help="Save models to folder with designated name")
     command_parser.add_argument('-r', action='store', dest='folder', help="Resume training with existing model. Input a model folder name")
+    command_parser.add_argument('-rw', action='store', dest='reg_weight',
+                                help="Set reg weight param")
+    command_parser.add_argument('-tl', action='store', dest='trainable_layers',
+                                help="Set trainable layers params")
     command_parser.set_defaults(func=train)
 
     command_parser = subparsers.add_parser('base', help='trains baseline model')
