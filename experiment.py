@@ -151,6 +151,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
     saver = ModelCheckpoint(model_folder + 'model', monitor='val_sparse_categorical_accuracy', save_best_only=True, mode='max')
 
+    with open(model_folder + 'config', 'wb') as pickle_file:
+        pickle.dump(config, pickle_file)
     history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
                                                  batch_size=config.batch_size, tokenizer=tokenizer, maxlen=config.max_seq_len),
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
@@ -160,13 +162,19 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                   ), steps_per_epoch=int(20000/config.batch_size), validation_steps=int(4500/config.batch_size))
 
 def evaluate(args):
-    config, model = load_model(args.name)
+    model = load_model(args.name)
+
 
     val_img_files = os.listdir('val_imgs/')
     test_img_files = os.listdir('test_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
     word_index, tokenizer = util.tokenize_texts(text_data)
+    embedding_matrix = util.load_embedding_matrix(word_index)
+    config = Config(word_index, embedding_matrix, imagenet_weights=True,
+                    trainable_convnet_layers=10,
+                    n_classes=100, lr=0.0001, reg_weight=0.01)
+
     bins = util.get_bins(prices, num=config.n_classes)
 
     results = model.evaluate_generator(util.generator(
