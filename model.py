@@ -34,8 +34,8 @@ class Config:
         self.reg_weight = reg_weight
 
 def build_model(config):
-    numeric_inputs = Input(shape=(config.numeric_input_size,))
     img_inputs = Input(shape=config.img_shape)
+    numeric_inputs = Input(shape=(config.numeric_input_size,))
     text_inputs = Input(shape=(config.max_seq_len,))
 
     #running cnn
@@ -43,14 +43,13 @@ def build_model(config):
         weights = 'imagenet'
     else:
         weights = None
-    image_model = Xception(input_shape=config.img_shape, include_top=False, weights=weights,
-                        input_tensor=img_inputs)
+    image_model = Xception(input_shape=config.img_shape, include_top=False, weights=weights)
     #freeze lower layers
     if weights is not None:
         for i in range(len(image_model.layers) - config.trainable_convnet_layers):
            image_model.layers[i].trainable = False
 
-    cnn_out = image_model.output
+    cnn_out = image_model(img_inputs)
     cnn_out = Flatten()(cnn_out)
     x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(cnn_out)
     for i in range(config.n_convnet_fc_layers):
