@@ -201,7 +201,7 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
     return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins)
 
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
-              verbose=False, batch_size=32, mode='train', tokenizer=None):
+              verbose=False, batch_size=32, mode='train', tokenizer=None, maxlen=20):
     while True:
         x, y = load_data_batch(img_files, numeric_data, text_data, bins,
                               img_shape=img_shape, verbose=verbose, batch_size=batch_size, mode=mode)
@@ -214,6 +214,7 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             break
         if tokenizer is not None:
             sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))
+            sequences = pad_sequences(sequences, maxlen=maxlen)
             print(sequences.shape)
             exit()
             yield [x[0], imgs, sequences], y

@@ -152,7 +152,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
     saver = ModelCheckpoint(model_folder + 'model', monitor='val_sparse_categorical_accuracy', save_best_only=True, mode='max')
 
     history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
-                                                 batch_size=config.batch_size, tokenizer=tokenizer),
+                                                 batch_size=config.batch_size, tokenizer=tokenizer, maxlen=config.max_seq_len),
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
                                   validation_data=util.generator(
                                       val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'
