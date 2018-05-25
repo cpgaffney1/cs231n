@@ -213,7 +213,7 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         for imgs, y in datagen.flow(imgs, y, batch_size=batch_size):
             break
         if tokenizer is not None:
-            sequences = np.asarray(tokenizer.texts_to_sequences(np.asarray(x[2])))
+            sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))
             print(sequences.shape)
             exit()
             yield [x[0], imgs, sequences], y
