@@ -186,7 +186,6 @@ def preprocess_numeric_data(num_data):
     for i in range(preprocessed_num_data.shape[0]):
         preprocessed_num_data[i][3] = zips_to_avg_prices[preprocessed_num_data[i][0]]
     print(preprocessed_num_data[:5])
-    exit()
     return preprocessed_num_data
 
 def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
@@ -198,6 +197,8 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
     img_data_batch = preprocess_input(img_data_batch)
     y_batch = numeric_data_batch[:, 3]
     numeric_data_batch = preprocess_numeric_data(numeric_data_batch)
+    print(y_batch[:5])
+    exit()
     return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins)
 
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
