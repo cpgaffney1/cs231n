@@ -11,7 +11,7 @@ from keras.applications.xception import preprocess_input
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.image import ImageDataGenerator
-
+from scipy.stats import kde
 
 
 def shuffle_in_parallel(arr1, arr2):
@@ -220,3 +220,17 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             yield [x[0], imgs, sequences], y
         else:
             yield [x[0], imgs], y
+
+
+def conf_matrix(y_true, y_false, nbins):
+    # 2D Histogram
+    plt.hist2d(y_true, y_false, bins=nbins, cmap=plt.cm.BuGn_r)
+    plt.title('2D Histogram')
+    plt.show()
+    if os.path.exists('Graphs/'):
+        plt.savefig('Graphs/Confusion_Matrix')
+    else:
+        os.makedirs('Graphs/')
+        plt.savefig('Graphs/Confusion_Matrix')
+
+
