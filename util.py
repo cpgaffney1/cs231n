@@ -172,6 +172,7 @@ def average_price_by_zip(zips, prices):
     zips_to_prices = {z: [] for z in zips}
     for i, zip in enumerate(zips):
         zips_to_prices[zip].append(prices[i])
+    print(zips_to_prices)
     zips_to_avg_prices = {z: np.mean(zips_to_prices[z]) for z in zips_to_prices.keys()}
     return zips_to_avg_prices
 
