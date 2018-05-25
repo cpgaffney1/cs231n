@@ -215,7 +215,7 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         if img_only:
             print('in img only')
             yield imgs, y
-        if tokenizer is not None:
+        elif tokenizer is not None:
             sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))
             sequences = pad_sequences(sequences, maxlen=maxlen)
             yield [x[0], imgs, sequences], y

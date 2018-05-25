@@ -166,7 +166,6 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
 def evaluate(args):
     model = load_model(args.name)
 
-
     val_img_files = os.listdir('val_imgs/')
     test_img_files = os.listdir('test_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
@@ -191,7 +190,7 @@ def evaluate(args):
     util.conf_matrix(, config.n_classes)'''
 
     results = model.evaluate_generator(util.generator(
-        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
+        test_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='test',
         tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
     )
