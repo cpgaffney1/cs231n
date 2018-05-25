@@ -63,15 +63,8 @@ def train(args):
     if not os.path.exists('models/'):
         os.mkdir('models/')
 
-    #K.clear_session()
-    #K.set_learning_phase(TEST_PHASE)
-
-    ## run param search and other stuff
-
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
-    price_index = np.genfromtxt('HPI_AT_BDL_ZIP5.csv', delimiter=',', skip_header=1, missing_values=['.'], filling_values=[0.0])
-    print(price_index)
-    exit()
+
 
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
@@ -181,27 +174,27 @@ def evaluate(args):
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='val',
-        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size), verbose=1
+        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
     )
     print(results)
 
     x, y = util.load_data_batch(val_img_files, numeric_data, text_data, bins, config.img_shape,
                     False, 4000, 'val')
     x = x[1]
-    predictions = model.predict(x, verbose=1)
+    predictions = model.predict(x)
     util.conf_matrix(y, predictions, config.n_classes)
 
     results = model.evaluate_generator(util.generator(
         test_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='test',
-        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size), verbose=1
+        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
     )
     print(results)
 
     x, y = util.load_data_batch(test_img_files, numeric_data, text_data, bins, config.img_shape,
                     False, 4000, 'test')
     x = x[1]
-    predictions = model.predict(x, verbose=1)
+    predictions = model.predict(x)
     util.conf_matrix(y, predictions, config.n_classes)
 
 
