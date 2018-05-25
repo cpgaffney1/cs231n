@@ -75,7 +75,7 @@ def train(args):
     embedding_matrix = util.load_embedding_matrix(word_index)
 
     if args.trainable_layers is None:
-        trainable_convnet_layers = 20
+        trainable_convnet_layers = 10
     else:
         trainable_convnet_layers = int(args.trainable_layers)
     if args.reg_weight is None:

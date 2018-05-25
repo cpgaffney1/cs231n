@@ -168,6 +168,27 @@ def save_file(x, name):
     out = csv.writer(open(name + '.csv', "w"), delimiter=',', quoting=csv.QUOTE_ALL)
     out.writecolumn(x)
 
+def average_price_by_zip(zips, prices):
+    zips_to_prices = {z: [] for z in zips}
+    for i, zip in enumerate(zips):
+        zips_to_prices[zip].append(prices[i])
+    zips_to_avg_prices = {z: np.mean(zips_to_prices[z]) for z in zips_to_prices.keys()}
+    return zips_to_avg_prices
+
+
+
+def preprocess_numeric_data(num_data):
+    zips = num_data[:, 0]
+    prices = num_data[:, 3]
+    zips_to_avg_prices = average_price_by_zip(zips, prices)
+    preprocessed_num_data = np.zeros((num_data.shape[0], 4))
+    # 0:zip, 1:beds, 2:baths
+    preprocessed_num_data[:, :3] = num_data[:, :3]
+    # 3:average price
+    for i in range(preprocessed_num_data.shape[0]):
+        preprocessed_num_data[i][3] = zips_to_avg_prices[preprocessed_num_data[i][0]]
+    return preprocessed_num_data
+
 def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
                     verbose, batch_size, mode):
     img_data_batch, numeric_data_batch, descriptions_batch, addresses_batch = \
@@ -175,10 +196,12 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
                                          text_data, numeric_data, desired_shape=img_shape, verbose=verbose, mode=mode)
     img_data_batch = img_data_batch.astype(np.float32)
     img_data_batch = preprocess_input(img_data_batch)
-    return [numeric_data_batch[:, 1:3], img_data_batch], buckets(numeric_data_batch[:, 3], bins)
+    y_batch = numeric_data_batch[:, 3]
+    numeric_data_batch = preprocess_numeric_data(numeric_data_batch)
+    return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins)
 
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
-              verbose=False, batch_size=32, mode='train'):
+              verbose=False, batch_size=32, mode='train', tokenizer=None):
     while True:
         x, y = load_data_batch(img_files, numeric_data, text_data, bins,
                               img_shape=img_shape, verbose=verbose, batch_size=batch_size, mode=mode)
@@ -189,4 +212,8 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         datagen.fit(imgs)
         for imgs, y in datagen.flow(imgs, y, batch_size=batch_size):
             break
-        yield [x[0], imgs], y
+        if tokenizer is not None:
+            sequences = tokenizer.texts_to_sequences(x[2])
+            yield [x[0], imgs, sequences], y
+        else:
+            yield [x[0], imgs], y
