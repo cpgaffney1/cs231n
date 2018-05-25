@@ -1,4 +1,4 @@
-from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, Dropout
+from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, Dropout, BatchNormalization
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
@@ -58,8 +58,8 @@ def build_model(config):
     cnn_out = x
 
     #running fc
-
-    x = Dense(32, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(numeric_inputs)
+    x = BatchNormalization()(numeric_inputs)
+    x = Dense(32, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     for i in range(config.n_numeric_layers - 1):
         x = Dense(16, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     fc_out = x

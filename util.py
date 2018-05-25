@@ -168,13 +168,13 @@ def save_file(x, name):
     out = csv.writer(open(name + '.csv', "w"), delimiter=',', quoting=csv.QUOTE_ALL)
     out.writecolumn(x)
 
-def average_price_by_zip(zips, prices):
+'''def average_price_by_zip(zips, prices):
     zips_to_prices = {z: [] for z in zips}
     for i, zip in enumerate(zips):
         zips_to_prices[zip].append(prices[i])
     print(zips_to_prices)
     zips_to_avg_prices = {z: np.mean(zips_to_prices[z]) for z in zips_to_prices.keys()}
-    return zips_to_avg_prices
+    return zips_to_avg_prices'''
 
 def preprocess_numeric_data(num_data):
     zips = num_data[:, 0]

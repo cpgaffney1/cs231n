@@ -88,7 +88,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=1000, lr=0.0001, reg_weight=reg_weight)
+                    n_classes=100, lr=0.0001, reg_weight=reg_weight)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -166,17 +166,21 @@ def evaluate(args):
     test_img_files = os.listdir('test_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
-
+    word_index, tokenizer = util.tokenize_texts(text_data)
     bins = util.get_bins(prices, num=config.n_classes)
 
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
-        batch_size=config.batch_size, mode='val'), steps_per_epoch=int(4500/config.batch_size))
+        batch_size=config.batch_size, mode='val'), steps_per_epoch=int(4500/config.batch_size),
+        tokenizer=tokenizer, maxlen=config.max_seq_len
+    )
     print(results)
 
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
-        batch_size=config.batch_size, mode='test'), steps_per_epoch=int(5000/config.batch_size))
+        batch_size=config.batch_size, mode='test'), steps_per_epoch=int(5000/config.batch_size),
+        tokenizer=tokenizer, maxlen=config.max_seq_len
+    )
     print(results)
 
 
