@@ -1,4 +1,4 @@
-from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, Dropout
+from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, Dropout, BatchNormalization
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
@@ -9,7 +9,7 @@ import keras.regularizers as regularizers
 
 
 class Config:
-    numeric_input_size = 4
+    numeric_input_size = 2
     img_shape = (224,224,3)
     n_classes = 1000
     batch_size = 64
@@ -58,8 +58,8 @@ def build_model(config):
     cnn_out = x
 
     #running fc
-
-    x = Dense(32, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(numeric_inputs)
+    x = BatchNormalization()(numeric_inputs)
+    x = Dense(32, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     for i in range(config.n_numeric_layers - 1):
         x = Dense(16, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     fc_out = x
@@ -98,8 +98,8 @@ def write_model(model, config, best_val_loss, model_folder):
 from keras.models import load_model as load_keras_model
 def load_model(model_folder):
     path = 'models/' + model_folder + '/'
-    model = load_keras_model(path + 'model.h5')
-    with open(path + 'config', 'rb') as pickle_file:
-        config = pickle.load(pickle_file)
-    return config, model
+    model = load_keras_model(path + 'model')
+    #with open(path + 'config', 'rb') as pickle_file:
+    #    config = pickle.load(pickle_file)
+    return model
 
