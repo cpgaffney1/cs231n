@@ -9,7 +9,7 @@ import keras.regularizers as regularizers
 
 
 class Config:
-    numeric_input_size = 4
+    numeric_input_size = 2
     img_shape = (224,224,3)
     n_classes = 1000
     batch_size = 64

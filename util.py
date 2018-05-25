@@ -172,21 +172,20 @@ def save_file(x, name):
     zips_to_prices = {z: [] for z in zips}
     for i, zip in enumerate(zips):
         zips_to_prices[zip].append(prices[i])
-    print(zips_to_prices)
     zips_to_avg_prices = {z: np.mean(zips_to_prices[z]) for z in zips_to_prices.keys()}
     return zips_to_avg_prices'''
 
 def preprocess_numeric_data(num_data):
     zips = num_data[:, 0]
     prices = num_data[:, 3]
-    zips_to_avg_prices = average_price_by_zip(zips, prices)
-    preprocessed_num_data = np.zeros((num_data.shape[0], 4))
+    #zips_to_avg_prices = average_price_by_zip(zips, prices)
+    preprocessed_num_data = np.zeros((num_data.shape[0], 2))
     # 0:zip, 1:beds, 2:baths
-    preprocessed_num_data[:, :3] = num_data[:, :3]
+    preprocessed_num_data[:, :] = num_data[:, 1:3]
     # 3:average price
-    for i in range(preprocessed_num_data.shape[0]):
-        preprocessed_num_data[i][3] = zips_to_avg_prices[preprocessed_num_data[i][0]]
-    print(preprocessed_num_data[:5])
+    #for i in range(preprocessed_num_data.shape[0]):
+    #    preprocessed_num_data[i][3] = zips_to_avg_prices[preprocessed_num_data[i][0]]
+    #exit()
     return preprocessed_num_data
 
 def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
@@ -198,8 +197,6 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
     img_data_batch = preprocess_input(img_data_batch)
     y_batch = numeric_data_batch[:, 3]
     numeric_data_batch = preprocess_numeric_data(numeric_data_batch)
-    print(y_batch[:5])
-    exit()
     return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins)
 
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
