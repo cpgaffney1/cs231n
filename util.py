@@ -175,18 +175,16 @@ def average_price_by_zip(zips, prices):
     zips_to_avg_prices = {z: np.mean(zips_to_prices[z]) for z in zips_to_prices.keys()}
     return zips_to_avg_prices
 
-
-
 def preprocess_numeric_data(num_data):
     zips = num_data[:, 0]
     prices = num_data[:, 3]
     zips_to_avg_prices = average_price_by_zip(zips, prices)
-    preprocessed_num_data = np.zeros((num_data.shape[0], 4))
+    preprocessed_num_data = np.zeros((num_data.shape[0], 3))
     # 0:zip, 1:beds, 2:baths
     preprocessed_num_data[:, :3] = num_data[:, :3]
     # 3:average price
-    for i in range(preprocessed_num_data.shape[0]):
-        preprocessed_num_data[i][3] = zips_to_avg_prices[preprocessed_num_data[i][0]]
+    #for i in range(preprocessed_num_data.shape[0]):
+    #    preprocessed_num_data[i][3] = zips_to_avg_prices[preprocessed_num_data[i][0]]
     return preprocessed_num_data
 
 def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,

@@ -88,7 +88,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.0001, reg_weight=reg_weight)
+                    n_classes=1000, lr=0.0001, reg_weight=reg_weight)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -155,7 +155,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                                  batch_size=config.batch_size, tokenizer=tokenizer, maxlen=config.max_seq_len),
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
                                   validation_data=util.generator(
-                                      val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'
+                                      val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size,
+                                      tokenizer=tokenizer, maxlen=config.max_seq_len, mode='val'
                                   ), steps_per_epoch=int(20000/config.batch_size), validation_steps=int(4500/config.batch_size))
 
 def evaluate(args):
