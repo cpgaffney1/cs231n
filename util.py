@@ -168,17 +168,10 @@ def save_file(x, name):
     out = csv.writer(open(name + '.csv', "w"), delimiter=',', quoting=csv.QUOTE_ALL)
     out.writecolumn(x)
 
-'''def average_price_by_zip(zips, prices):
-    zips_to_prices = {z: [] for z in zips}
-    for i, zip in enumerate(zips):
-        zips_to_prices[zip].append(prices[i])
-    zips_to_avg_prices = {z: np.mean(zips_to_prices[z]) for z in zips_to_prices.keys()}
-    return zips_to_avg_prices'''
-
 def preprocess_numeric_data(num_data):
     zips = num_data[:, 0]
     prices = num_data[:, 3]
-    #zips_to_avg_prices = average_price_by_zip(zips, prices)
+
     preprocessed_num_data = np.zeros((num_data.shape[0], 2))
     # 0:zip, 1:beds, 2:baths
     preprocessed_num_data[:, :] = num_data[:, 1:3]
@@ -213,7 +206,6 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         for imgs, y in datagen.flow(imgs, y, batch_size=batch_size):
             break
         if img_only:
-            print('in img only')
             yield imgs, y
         elif tokenizer is not None:
             sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))

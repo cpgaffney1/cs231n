@@ -181,22 +181,28 @@ def evaluate(args):
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='val',
-        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
+        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size), verbose=1
     )
     print(results)
-    '''x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
-                    verbose, batch_size, mode)
-    predictions = model.predict()
-    util.conf_matrix(, config.n_classes)'''
+
+    x, y = util.load_data_batch(val_img_files, numeric_data, text_data, bins, config.img_shape,
+                    False, 4000, 'val')
+    x = x[1]
+    predictions = model.predict(x, verbose=1)
+    util.conf_matrix(y, predictions, config.n_classes)
 
     results = model.evaluate_generator(util.generator(
         test_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='test',
-        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
+        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size), verbose=1
     )
     print(results)
 
-    '''util.conf_matrix(, config.n_classes)'''
+    x, y = util.load_data_batch(test_img_files, numeric_data, text_data, bins, config.img_shape,
+                    False, 4000, 'test')
+    x = x[1]
+    predictions = model.predict(x, verbose=1)
+    util.conf_matrix(y, predictions, config.n_classes)
 
 
 
