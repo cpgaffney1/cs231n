@@ -182,14 +182,14 @@ def evaluate(args):
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='val',
-        tokenizer=tokenizer, maxlen=config.max_seq_len), steps=int(4500/config.batch_size)
+        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
     )
     print(results)
 
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='test',
-        tokenizer=tokenizer, maxlen=config.max_seq_len), steps=int(4500/config.batch_size)
+        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
     )
     print(results)
 
