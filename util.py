@@ -225,7 +225,7 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
 def conf_matrix(y_true, y_false, nbins):
     # 2D Histogram
     plt.hist2d(y_true, y_false, bins=nbins, cmap=plt.cm.BuGn_r)
-    plt.title('2D Histogram')
+    plt.title('Confusion Matrix')
     plt.show()
     if os.path.exists('Graphs/'):
         plt.savefig('Graphs/Confusion_Matrix')
