@@ -214,6 +214,8 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             break
         if tokenizer is not None:
             sequences = tokenizer.texts_to_sequences(x[2])
+            print(sequences.shape)
+            exit()
             yield [x[0], imgs, sequences], y
         else:
             yield [x[0], imgs], y
