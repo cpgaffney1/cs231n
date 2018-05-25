@@ -82,7 +82,7 @@ def build_model(config):
     predictions = Dense(config.n_classes, activation='softmax', name='main_output', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
-    model = Model(inputs=[numeric_inputs, img_inputs], outputs=predictions)
+    model = Model(inputs=[numeric_inputs, img_inputs, text_inputs], outputs=predictions)
     opt = Adam(lr=config.lr)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
     return model
