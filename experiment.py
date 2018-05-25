@@ -104,7 +104,7 @@ def train(args):
                 model_folder = ''
 
     bins = util.get_bins(prices, num=config.n_classes)
-    train_model(model, config, numeric_data, text_data, bins, model_folder)
+    train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer)
 
 '''
 def sample_params():
@@ -134,7 +134,7 @@ def optimize_params(word_index, embedding_matrix, n_trials=1000):
         train_model(model, config, numeric_data, text_data, ) '''
 
 
-def train_model(model, config, numeric_data, text_data, bins, model_folder):
+def train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer):
     best_val_loss = float('inf')
     global loaded_img_data
     global loaded_numeric_data
@@ -151,7 +151,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder):
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
     saver = ModelCheckpoint(model_folder + 'model', monitor='val_sparse_categorical_accuracy', save_best_only=True, mode='max')
 
-    history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size),
+    history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
+                                                 batch_size=config.batch_size, tokenizer=tokenizer),
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
                                   validation_data=util.generator(
                                       val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size, mode='val'
