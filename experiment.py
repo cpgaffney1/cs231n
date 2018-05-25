@@ -185,6 +185,10 @@ def evaluate(args):
         tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
     )
     print(results)
+    '''x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
+                    verbose, batch_size, mode)
+    predictions = model.predict()
+    util.conf_matrix(, config.n_classes)'''
 
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
@@ -193,6 +197,7 @@ def evaluate(args):
     )
     print(results)
 
+    '''util.conf_matrix(, config.n_classes)'''
 
 
 
