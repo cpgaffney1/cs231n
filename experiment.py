@@ -54,7 +54,6 @@ def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, re
 
     np.savetxt('train_preds_linear.csv', train_pred, delimiter=',')
     np.savetxt('train_actual_linear.csv', y_train, delimiter=',')
-    exit()
 
     util.print_distribution(train_pred, bins, real=y_train)
     util.print_distribution(dev_pred, bins, real=y_dev)
@@ -70,7 +69,7 @@ def train(args):
     ## run param search and other stuff
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
-    price_index = np.loadtxt('HPI_AT_BDL_ZIP5.csv', delimiter=',', skiprows=1)
+    price_index = np.genfromtxt('HPI_AT_BDL_ZIP5.csv', delimiter=',', skip_header=1, missing_values=['.'], filling_values=[0.0])
     print(price_index)
     exit()
 
@@ -183,14 +182,14 @@ def evaluate(args):
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='val',
-        tokenizer=tokenizer, maxlen=config.max_seq_len)
+        tokenizer=tokenizer, maxlen=config.max_seq_len), steps=int(4500/config.batch_size)
     )
     print(results)
 
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode='test',
-        tokenizer=tokenizer, maxlen=config.max_seq_len)
+        tokenizer=tokenizer, maxlen=config.max_seq_len), steps=int(4500/config.batch_size)
     )
     print(results)
 
