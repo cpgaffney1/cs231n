@@ -70,6 +70,9 @@ def train(args):
     ## run param search and other stuff
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
+    price_index = np.loadtxt('HPI_AT_BDL_ZIP5.csv', delimiter=',', skiprows=1)
+    print(price_index)
+    exit()
 
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
@@ -179,15 +182,15 @@ def evaluate(args):
 
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
-        batch_size=config.batch_size, mode='val'),
-        tokenizer=tokenizer, maxlen=config.max_seq_len
+        batch_size=config.batch_size, mode='val',
+        tokenizer=tokenizer, maxlen=config.max_seq_len)
     )
     print(results)
 
     results = model.evaluate_generator(util.generator(
         val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
-        batch_size=config.batch_size, mode='test'),
-        tokenizer=tokenizer, maxlen=config.max_seq_len
+        batch_size=config.batch_size, mode='test',
+        tokenizer=tokenizer, maxlen=config.max_seq_len)
     )
     print(results)
 
