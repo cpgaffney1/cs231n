@@ -15,7 +15,7 @@ class Config:
     batch_size = 64
     embed_dim = 50
     max_seq_len = 30
-    def __init__(self, word_index, embedding_matrix, lr=0.001, n_recurrent_layers=1, n_numeric_layers=2,
+    def __init__(self, word_index, embedding_matrix, tokenizer, lr=0.001, n_recurrent_layers=1, n_numeric_layers=3,
                  trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=1, n_convnet_fc_layers=2,
                  n_classes=1000, drop_prob=0.5, reg_weight=0.01):
         self.word_index = word_index
@@ -32,9 +32,10 @@ class Config:
         self.n_classes = n_classes
         self.drop_prob = drop_prob
         self.reg_weight = reg_weight
+        self.tokenizer = tokenizer
 
 def build_model(config):
-    img_inputs = Input(shape=config.img_shape)
+    img_inputs = Input(shape=config.img_shape, name='img_input')
     numeric_inputs = Input(shape=(config.numeric_input_size,))
     text_inputs = Input(shape=(config.max_seq_len,))
 
@@ -59,9 +60,9 @@ def build_model(config):
 
     #running fc
     x = BatchNormalization()(numeric_inputs)
-    x = Dense(32, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+    x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     for i in range(config.n_numeric_layers - 1):
-        x = Dense(16, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+        x = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     fc_out = x
 
     #running RNN
@@ -99,7 +100,7 @@ from keras.models import load_model as load_keras_model
 def load_model(model_folder):
     path = 'models/' + model_folder + '/'
     model = load_keras_model(path + 'model')
-    #with open(path + 'config', 'rb') as pickle_file:
-    #    config = pickle.load(pickle_file)
-    return model
+    with open(path + 'config', 'rb') as pickle_file:
+        config = pickle.load(pickle_file)
+    return model, config
 

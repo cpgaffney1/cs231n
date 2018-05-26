@@ -133,6 +133,9 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
 
     return imgs, ordered_numeric_data, ordered_descriptions, ordered_addresses
 
+###########################
+####### zip, beds, baths, price
+###########################
 
 def load_tabular_data():
     numeric_data = {}

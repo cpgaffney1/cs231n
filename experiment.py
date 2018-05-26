@@ -6,6 +6,9 @@ import sys
 import csv
 from PIL import Image
 import pickle
+from vis.visualization import visualize_activation
+from vis.utils import utils as vis_utils
+from keras import activations
 
 
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger, ModelCheckpoint
@@ -65,7 +68,6 @@ def train(args):
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
-
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
 
@@ -79,10 +81,10 @@ def train(args):
         reg_weight = float(args.reg_weight)
 
     if args.folder is not None:
-        config, model = load_model(args.folder)
+        model, config = load_model(args.folder)
         model_folder = 'models/' + args.folder + '/'
     else:
-        config = Config(word_index, embedding_matrix, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
+        config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
                     n_classes=100, lr=0.0001, reg_weight=reg_weight)
         model = build_model(config)
         if args.name is not None:
@@ -98,6 +100,7 @@ def train(args):
             else:
                 model_folder = ''
 
+    numeric_data = util.preprocess_numeric_data(numeric_data, asofijasdoifdj, num_features=config.numeric_input_size)
     bins = util.get_bins(prices, num=config.n_classes)
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer)
 
@@ -157,46 +160,51 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                   ), steps_per_epoch=int(20000/config.batch_size), validation_steps=int(4500/config.batch_size))
 
 def evaluate(args):
-    model = load_model(args.name)
+    model, config = load_model(args.name)
+    if args.test:
+        mode = 'test'
+    else:
+        mode = 'val'
 
-    val_img_files = os.listdir('val_imgs/')
-    test_img_files = os.listdir('test_imgs/')
+    img_files = os.listdir(mode + '_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
-    word_index, tokenizer = util.tokenize_texts(text_data)
-    embedding_matrix = util.load_embedding_matrix(word_index)
-    config = Config(word_index, embedding_matrix, imagenet_weights=True,
-                    trainable_convnet_layers=10,
-                    n_classes=100, lr=0.0001, reg_weight=0.01)
+    #word_index, tokenizer = util.tokenize_texts(text_data)
+    #embedding_matrix = util.load_embedding_matrix(word_index)
+    #config = Config(word_index, embedding_matrix, imagenet_weights=True,
+    #                trainable_convnet_layers=10,
+    #                n_classes=100, lr=0.0001, reg_weight=0.01)
+
 
     bins = util.get_bins(prices, num=config.n_classes)
 
     results = model.evaluate_generator(util.generator(
-        val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
-        batch_size=config.batch_size, mode='val',
-        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
+        img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
+        batch_size=config.batch_size, mode=mode,
+        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
     )
     print(results)
 
-    x, y = util.load_data_batch(val_img_files, numeric_data, text_data, bins, config.img_shape,
-                    False, 4000, 'val')
+    x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
+                    False, len(img_files), mode)
     x = x[1]
     predictions = model.predict(x)
-    util.conf_matrix(y, predictions, config.n_classes)
 
-    results = model.evaluate_generator(util.generator(
-        test_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
-        batch_size=config.batch_size, mode='test',
-        tokenizer=tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
-    )
-    print(results)
+    util.conf_matrix(y, predictions, config.n_classes, suffix='_' + mode)
 
-    x, y = util.load_data_batch(test_img_files, numeric_data, text_data, bins, config.img_shape,
-                    False, 4000, 'test')
-    x = x[1]
-    predictions = model.predict(x)
-    util.conf_matrix(y, predictions, config.n_classes)
+    show_saliency(model, mode)
 
+
+def show_saliency(model, mode):
+    layer_idx = vis_utils.find_layer_idx(model, 'main_output')
+    input_idx = vis_utils.find_layer_idx(model, 'img_input')
+    input_tensor = model.layers[input_idx]
+    model.layers[layer_idx].activation = activations.linear
+    model = vis_utils.apply_modifications(model)
+    filter_indices = [10, 30, 50, 70, 90]
+    for f_idx in filter_indices:
+        img = visualize_activation(model, layer_idx, filter_indices=f_idx, seed_input=input_tensor)
+        util.save_saliency_imgs(img, suffix='_' + mode + '_{}'.format(f_idx))
 
 
 if __name__ == '__main__':
@@ -221,6 +229,7 @@ if __name__ == '__main__':
     command_parser = subparsers.add_parser('eval', help='evaluate model')
     command_parser.add_argument('-n', action='store', dest='name',
                                 help="load model with selected name")
+    command_parser.add_argument('-t', '--test', action='store_true', default=False, help="Do on test set. default is validation set")
     command_parser.set_defaults(func=evaluate)
 
 

@@ -3,6 +3,8 @@ from PIL import Image
 import os
 import sys
 import re
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import csv
 import preprocessing
@@ -168,7 +170,7 @@ def save_file(x, name):
     out = csv.writer(open(name + '.csv', "w"), delimiter=',', quoting=csv.QUOTE_ALL)
     out.writecolumn(x)
 
-def preprocess_numeric_data(num_data):
+'''def preprocess_numeric_data(num_data):
     zips = num_data[:, 0]
     prices = num_data[:, 3]
 
@@ -179,7 +181,31 @@ def preprocess_numeric_data(num_data):
     #for i in range(preprocessed_num_data.shape[0]):
     #    preprocessed_num_data[i][3] = zips_to_avg_prices[preprocessed_num_data[i][0]]
     #exit()
-    return preprocessed_num_data
+    return preprocessed_num_data'''
+
+
+def preprocess_numeric_data(num_data_orig, additional_data, num_features=2):
+    num_data = np.zeros((num_data_orig.shape[0], num_features))
+    zips = num_data_orig[:, 0]
+    prices = num_data_orig[:, 3]
+    num_data[:, 0] = prices
+    num_data[:, 1:3] = num_data_orig[:, 1:3]
+    num_data[:, 3:] = additional_data[:, :]
+    return num_data
+
+
+def fill_missing_hpi(num_data, zip_col, hpi_col, missing_indicator=np.nan):
+    zips_sorted = sorted(num_data[:, zip_col])
+    zip_to_hpi = {num_data[i][zip_col]: num_data[i][hpi_col] for i in range(len(num_data)) \
+                  if num_data[i][hpi_col] is not missing_indicator and num_data[i][hpi_col] != missing_indicator}
+    for i in range(num_data.shape[0]):
+        if num_data[i][hpi_col] is missing_indicator or num_data[i] == missing_indicator:
+            closest_zip = zips_sorted[np.searchsorted(zips_sorted, num_data[i][zip_col])]
+            num_data[i][hpi_col] = zip_to_hpi[closest_zip]
+    return num_data
+
+def remove_price_array_from_numeric_data(num_data):
+    return num_data[:, 0], num_data[:, 1:]
 
 def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
                     verbose, batch_size, mode):
@@ -188,8 +214,8 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
                                          text_data, numeric_data, desired_shape=img_shape, verbose=verbose, mode=mode)
     img_data_batch = img_data_batch.astype(np.float32)
     img_data_batch = preprocess_input(img_data_batch)
-    y_batch = numeric_data_batch[:, 3]
-    numeric_data_batch = preprocess_numeric_data(numeric_data_batch)
+    y_batch, numeric_data_batch = remove_price_array_from_numeric_data(numeric_data_batch)
+    #numeric_data_batch = preprocess_numeric_data(numeric_data_batch)
     return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins)
 
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
@@ -215,15 +241,17 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             yield [x[0], imgs], y
 
 
-def conf_matrix(y_true, y_false, nbins):
+def conf_matrix(y_true, y_false, nbins, suffix=''):
     # 2D Histogram
     plt.hist2d(y_true, y_false, bins=nbins, cmap=plt.cm.BuGn_r)
     plt.title('Confusion Matrix')
     plt.show()
     if os.path.exists('Graphs/'):
-        plt.savefig('Graphs/Confusion_Matrix')
+        plt.savefig('Graphs/Confusion_Matrix' + suffix)
     else:
         os.makedirs('Graphs/')
-        plt.savefig('Graphs/Confusion_Matrix')
+        plt.savefig('Graphs/Confusion_Matrix' + suffix)
 
+def save_saliency_imgs(img, suffix=''):
+    plt.imsave('Graphs/saliency_map' + suffix, img)
 
