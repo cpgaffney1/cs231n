@@ -198,7 +198,7 @@ def evaluate(args):
         x = x[1]
     predictions = model.predict(x)
 
-    util.conf_matrix(y, predictions, config.n_classes, suffix='_' + mode)
+    util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_' + mode)
     #np.savetxt('bins.csv', bins, delimiter=',')
     #np.savetxt('train_preds_CNN.csv', predictions, delimiter=',')
 
