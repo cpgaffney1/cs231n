@@ -171,11 +171,12 @@ def evaluate(args):
     img_files = os.listdir(mode + '_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
-    #word_index, tokenizer = util.tokenize_texts(text_data)
-    #embedding_matrix = util.load_embedding_matrix(word_index)
-    #config = Config(word_index, embedding_matrix, imagenet_weights=True,
-    #                trainable_convnet_layers=10,
-    #                n_classes=100, lr=0.0001, reg_weight=0.01)
+    if config is None:
+        word_index, tokenizer = util.tokenize_texts(text_data)
+        embedding_matrix = util.load_embedding_matrix(word_index)
+        config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True,
+                    trainable_convnet_layers=10,
+                    n_classes=100, lr=0.0001, reg_weight=0.01)
 
 
     bins = util.get_bins(prices, num=config.n_classes)
