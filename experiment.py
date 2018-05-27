@@ -8,7 +8,7 @@ from PIL import Image
 import pickle
 import keras.backend as K
 
-
+import keras.losses as losses
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger, ModelCheckpoint
 
 from sklearn.linear_model import LogisticRegression
@@ -213,9 +213,9 @@ def evaluate(args):
 
     label_tensor = K.constant(vis_y)
     if img_only_model:
-        fn = K.function(model.inputs, K.gradients(model.loss(label_tensor, model.outputs), model.inputs))
+        fn = K.function(model.inputs, K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs), model.inputs))
     else:
-        fn = K.function(model.inputs, K.gradients(model.loss(label_tensor, model.outputs), model.inputs[1]))
+        fn = K.function(model.inputs, K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs), model.inputs[1]))
     grads = K.eval(fn(vis_x))
 
     saliency = np.absolute(grads).max(axis=-1)
