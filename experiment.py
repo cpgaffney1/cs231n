@@ -202,22 +202,14 @@ def evaluate(args):
     #np.savetxt('bins.csv', bins, delimiter=',')
     #np.savetxt('train_preds_CNN.csv', predictions, delimiter=',')
 
-    vis_indices = list(range(10))
 
+    label_tensor = K.constant(y)
     if img_only_model:
-        vis_x = x
-    else:
-        vis_x = [x[0][vis_indices], x[1][vis_indices], x[2][vis_indices]]
-    vis_y = y[vis_indices]
-    vis_predictions = model.predict(vis_x)
-
-
-    label_tensor = K.constant(vis_y)
-    if img_only_model:
+        x = x[1]
         fn = K.function(model.inputs, K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), model.inputs))
     else:
         fn = K.function([model.inputs[0]], K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), [model.inputs[0]]))
-    grads = K.eval(fn([vis_x]))
+    grads = K.eval(fn([x]))
 
     saliency = np.absolute(grads).max(axis=-1)
     print(saliency)
