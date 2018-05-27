@@ -214,10 +214,9 @@ def evaluate(args):
     grads = grads[0]
 
     saliency = np.absolute(grads).max(axis=-1)
-    print(saliency)
 
     import matplotlib.pyplot as plt
-    plt.imsave('test_fig.png', saliency, cmap=plt.cm.hot)
+    plt.imsave('test_fig.png', saliency[:,:,0], cmap=plt.cm.hot)
 
 '''
     show_saliency(model, mode)
