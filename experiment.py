@@ -172,38 +172,48 @@ def evaluate(args):
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
     if config is None:
+        img_only_model = True
         word_index, tokenizer = util.tokenize_texts(text_data)
         embedding_matrix = util.load_embedding_matrix(word_index)
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True,
                     trainable_convnet_layers=10,
                     n_classes=100, lr=0.0001, reg_weight=0.01)
-
+    else:
+        img_only_model = False
 
     bins = util.get_bins(prices, num=config.n_classes)
 
     results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
-        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(len(img_files)/config.batch_size)
+        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=img_only_model), steps=int(len(img_files)/config.batch_size)
     )
     print(results)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                     False, len(img_files), mode)
+    if img_only_model:
+        x = x[1]
     predictions = model.predict(x)
-    imgs = x[1]
 
     util.conf_matrix(y, predictions, config.n_classes, suffix='_' + mode)
     np.savetxt('bins.csv', bins, delimiter=',')
     np.savetxt('train_preds_CNN.csv', predictions, delimiter=',')
 
     vis_indices = list(range(10))
-    vis_x = [x[0][vis_indices], x[1][vis_indices], x[2][vis_indices]]
+
+    if img_only_model:
+        vis_x = x
+    else:
+        vis_x = [x[0][vis_indices], x[1][vis_indices], x[2][vis_indices]]
     vis_y = y[vis_indices]
     vis_predictions = model.predict(vis_x)
 
     label_tensor = K.constant(vis_y)
-    fn = K.function(model.inputs, K.gradients(model.loss(label_tensor, model.outputs), [model.inputs[1]]))
+    if img_only_model:
+        fn = K.function(model.inputs, K.gradients(model.loss(label_tensor, model.outputs), model.inputs))
+    else:
+        fn = K.function(model.inputs, K.gradients(model.loss(label_tensor, model.outputs), model.inputs[1]))
     grads = K.eval(fn(vis_x))
 
     saliency = np.absolute(grads).max(axis=-1)
