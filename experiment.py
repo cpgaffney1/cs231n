@@ -192,15 +192,15 @@ def evaluate(args):
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                     False, len(img_files), mode)
-    x = x[:256]
+    x = [x[0][:256], x[1][:256], x[2][:256]]
     y = y[:256]
     if img_only_model:
         x = x[1]
     predictions = model.predict(x)
 
     util.conf_matrix(y, predictions, config.n_classes, suffix='_' + mode)
-    np.savetxt('bins.csv', bins, delimiter=',')
-    np.savetxt('train_preds_CNN.csv', predictions, delimiter=',')
+    #np.savetxt('bins.csv', bins, delimiter=',')
+    #np.savetxt('train_preds_CNN.csv', predictions, delimiter=',')
 
     vis_indices = list(range(10))
 
