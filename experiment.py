@@ -211,6 +211,7 @@ def evaluate(args):
     vis_y = y[vis_indices]
     vis_predictions = model.predict(vis_x)
 
+
     label_tensor = K.constant(vis_y)
     if img_only_model:
         fn = K.function(model.inputs, K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), model.inputs))
