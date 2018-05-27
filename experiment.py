@@ -186,12 +186,14 @@ def evaluate(args):
     results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
-        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=img_only_model), steps=int(len(img_files)/config.batch_size)
+        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=img_only_model), steps=int(256/config.batch_size)
     )
     print(results)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                     False, len(img_files), mode)
+    x = x[:256]
+    y = y[:256]
     if img_only_model:
         x = x[1]
     predictions = model.predict(x)
