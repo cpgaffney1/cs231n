@@ -192,8 +192,8 @@ def evaluate(args):
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                     False, len(img_files), mode)
-    x = [x[0][:256], x[1][:256], x[2][:256]]
-    y = y[:256]
+    x = [x[0][:64], x[1][:64], x[2][:64]]
+    y = y[:64]
     if img_only_model:
         x = x[1]
     predictions = model.predict(x)
@@ -215,7 +215,7 @@ def evaluate(args):
     if img_only_model:
         fn = K.function(model.inputs, K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), model.inputs))
     else:
-        fn = K.function(model.inputs[0], K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), model.inputs[0]))
+        fn = K.function([model.inputs[0]], K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), [model.inputs[0]]))
     grads = K.eval(fn(vis_x))
 
     saliency = np.absolute(grads).max(axis=-1)
