@@ -209,7 +209,9 @@ def evaluate(args):
     else:
         fn = K.function([model.inputs[0]], K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), [model.inputs[0]]))
     print(x.shape)
-    grads = K.eval(fn([x]))
+    grads = fn([x])
+    print(grads)
+    grads = K.eval(grads[0])
 
     saliency = np.absolute(grads).max(axis=-1)
     print(saliency)
