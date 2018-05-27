@@ -205,10 +205,10 @@ def evaluate(args):
 
     label_tensor = K.constant(y)
     if img_only_model:
-        x = x[1]
         fn = K.function(model.inputs, K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), model.inputs))
     else:
         fn = K.function([model.inputs[0]], K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), [model.inputs[0]]))
+    print(x.shape)
     grads = K.eval(fn([x]))
 
     saliency = np.absolute(grads).max(axis=-1)
