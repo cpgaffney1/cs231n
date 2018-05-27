@@ -8,12 +8,15 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import csv
 import preprocessing
+import tensorflow as tf
 
 from keras.applications.xception import preprocess_input
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.image import ImageDataGenerator
 from scipy.stats import kde
+
+import keras.backend as K
 
 
 def shuffle_in_parallel(arr1, arr2):
@@ -191,6 +194,7 @@ def preprocess_numeric_data(num_data_orig, additional_data, num_features=2):
     num_data[:, 0] = prices
     num_data[:, 1:3] = num_data_orig[:, 1:3]
     num_data[:, 3:] = additional_data[:, :]
+    num_data = fill_missing_hpi(num_data, 0, 20, missing_indicator=np.nan)
     return num_data
 
 
@@ -245,7 +249,6 @@ def conf_matrix(y_true, y_false, nbins, suffix=''):
     # 2D Histogram
     plt.hist2d(y_true, y_false, bins=nbins, cmap=plt.cm.BuGn_r)
     plt.title('Confusion Matrix')
-    plt.show()
     if os.path.exists('Graphs/'):
         plt.savefig('Graphs/Confusion_Matrix' + suffix)
     else:
@@ -254,4 +257,3 @@ def conf_matrix(y_true, y_false, nbins, suffix=''):
 
 def save_saliency_imgs(img, suffix=''):
     plt.imsave('Graphs/saliency_map' + suffix, img)
-

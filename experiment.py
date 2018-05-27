@@ -6,9 +6,7 @@ import sys
 import csv
 from PIL import Image
 import pickle
-from vis.visualization import visualize_activation
-from vis.utils import utils as vis_utils
-from keras import activations
+import keras.backend as K
 
 
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger, ModelCheckpoint
@@ -57,6 +55,9 @@ def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, re
 
     np.savetxt('train_preds_linear.csv', train_pred, delimiter=',')
     np.savetxt('train_actual_linear.csv', y_train, delimiter=',')
+    np.savetxt('bins.csv', bins, delimiter=',')
+
+    util.conf_matrix(y_train, train_pred, 100, suffix='_' + 'linear')
 
     util.print_distribution(train_pred, bins, real=y_train)
     util.print_distribution(dev_pred, bins, real=y_dev)
@@ -100,7 +101,8 @@ def train(args):
             else:
                 model_folder = ''
 
-    numeric_data = util.preprocess_numeric_data(numeric_data, asofijasdoifdj, num_features=config.numeric_input_size)
+    additional_num_data = np.genfromtxt('FILENAME', skip_header=1, missing_values=[], filling_values=[np.nan], )
+    numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data, num_features=config.numeric_input_size)
     bins = util.get_bins(prices, num=config.n_classes)
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer)
 
@@ -157,7 +159,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                   validation_data=util.generator(
                                       val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size,
                                       tokenizer=tokenizer, maxlen=config.max_seq_len, mode='val'
-                                  ), steps_per_epoch=int(20000/config.batch_size), validation_steps=int(4500/config.batch_size))
+                                  ), steps_per_epoch=int(20000/config.batch_size), validation_steps=int(len(val_img_files)/config.batch_size))
 
 def evaluate(args):
     model, config = load_model(args.name)
@@ -181,17 +183,33 @@ def evaluate(args):
     results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
-        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(4500/config.batch_size)
+        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=True), steps=int(len(img_files)/config.batch_size)
     )
     print(results)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                     False, len(img_files), mode)
-    x = x[1]
     predictions = model.predict(x)
+    imgs = x[1]
 
     util.conf_matrix(y, predictions, config.n_classes, suffix='_' + mode)
+    np.savetxt('bins.csv', bins, delimiter=',')
+    np.savetxt('train_preds_CNN.csv', predictions, delimiter=',')
 
+    vis_indices = list(range(10))
+    vis_x = [x[0][vis_indices], x[1][vis_indices], x[2][vis_indices]]
+    vis_y = y[vis_indices]
+    vis_predictions = model.predict(vis_x)
+
+    label_tensor = K.constant(vis_y)
+    fn = K.function(model.inputs, K.gradients(model.loss(label_tensor, model.outputs), [model.inputs[1]]))
+    grads = K.eval(fn(vis_x))
+
+    saliency = np.absolute(grads).max(axis=-1)
+    print(saliency)
+
+
+'''
     show_saliency(model, mode)
 
 
@@ -205,7 +223,7 @@ def show_saliency(model, mode):
     for f_idx in filter_indices:
         img = visualize_activation(model, layer_idx, filter_indices=f_idx, seed_input=input_tensor)
         util.save_saliency_imgs(img, suffix='_' + mode + '_{}'.format(f_idx))
-
+'''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trains and tests the model.')

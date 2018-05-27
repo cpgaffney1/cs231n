@@ -6,6 +6,7 @@ from keras.applications.resnet50 import ResNet50
 from keras.optimizers import Adam
 from keras.layers import Embedding
 import keras.regularizers as regularizers
+import keras.losses as losses
 
 
 class Config:
@@ -60,9 +61,9 @@ def build_model(config):
 
     #running fc
     x = BatchNormalization()(numeric_inputs)
+    x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
-    for i in range(config.n_numeric_layers - 1):
-        x = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+    x = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     fc_out = x
 
     #running RNN
