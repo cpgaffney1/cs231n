@@ -7,7 +7,7 @@ import csv
 from PIL import Image
 import pickle
 import keras.backend as K
-
+import matplotlib.pyplot as plt
 import keras.losses as losses
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger, ModelCheckpoint
 
@@ -186,14 +186,12 @@ def evaluate(args):
     results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
-        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=img_only_model), steps=int(256/config.batch_size)
+        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=img_only_model), steps=int(len(img_files)/config.batch_size)
     )
     print(results)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                     False, len(img_files), mode)
-    x = [x[0][:64], x[1][:64], x[2][:64]]
-    y = y[:64]
     if img_only_model:
         x = x[1]
     predictions = model.predict(x)
@@ -203,25 +201,33 @@ def evaluate(args):
     #np.savetxt('train_preds_CNN.csv', predictions, delimiter=',')
 
 
+
+
+def show_saliency(model, x, y, mode, img_only_model=False):
+    indices = np.arange(0, x.shape[0])
+    np.random.shuffle(indices)
+    indices = indices[:64]
+    x = [x[0][indices], x[1][indices], x[2][indices]]
+    y = y[indices]
+
     label_tensor = K.constant(y)
     if img_only_model:
-        fn = K.function(model.inputs, K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), model.inputs))
+        fn = K.function(model.inputs,
+                        K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]),
+                                    model.inputs))
     else:
-        fn = K.function([model.inputs[0]], K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]), [model.inputs[0]]))
-    print(x.shape)
+        fn = K.function([model.inputs[0]],
+                        K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]),
+                                    [model.inputs[0]]))
     grads = fn([x])
-    print(len(grads))
     grads = grads[0]
 
     saliency = np.absolute(grads).max(axis=-1)
 
-    import matplotlib.pyplot as plt
-    plt.imsave('test_fig.png', saliency[:,:,0], cmap=plt.cm.hot)
+    for i in range(grads.shape[0]):
+        plt.imsave('Graphs/saliency_{}_{}.png'.format(i, mode), saliency[0], cmap=plt.cm.hot)
 
 '''
-    show_saliency(model, mode)
-
-
 def show_saliency(model, mode):
     layer_idx = vis_utils.find_layer_idx(model, 'main_output')
     input_idx = vis_utils.find_layer_idx(model, 'img_input')
