@@ -18,7 +18,7 @@ class Config:
     max_seq_len = 30
     def __init__(self, word_index, embedding_matrix, tokenizer, lr=0.001, n_recurrent_layers=1, n_numeric_layers=3,
                  trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=1, n_convnet_fc_layers=2,
-                 n_classes=1000, drop_prob=0.5, reg_weight=0.01):
+                 n_classes=1000, drop_prob=0.5, reg_weight=0.01, img_only=False):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
         self.vocab_size = len(word_index)
@@ -34,6 +34,7 @@ class Config:
         self.drop_prob = drop_prob
         self.reg_weight = reg_weight
         self.tokenizer = tokenizer
+        self.img_only=img_only
 
 def build_model(config):
     img_inputs = Input(shape=config.img_shape, name='img_input')
@@ -79,7 +80,10 @@ def build_model(config):
     # to top layer of text network
 
     #concat them
-    x = concatenate([cnn_out, fc_out, rnn_out])
+    if config.img_only:
+        x = cnn_out
+    else:
+        x = concatenate([cnn_out, fc_out, rnn_out])
 
     predictions = Dense(config.n_classes, activation='softmax', name='main_output', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
 

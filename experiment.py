@@ -23,6 +23,24 @@ n_iterations = 1000
 TRAIN_PHASE = 0
 TEST_PHASE = 1
 
+def visualize(args):
+    img_files = os.listdir('imgs/')
+    n_classes = 100
+    img_shape = (224,224,3)
+    numeric_data, text_data, prices = preprocessing.load_tabular_data()
+    bins = util.get_bins(prices, num=n_classes)
+
+    x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
+                                True, 6, 'train')
+    img_arr = x[1]
+
+    img_merge = np.vstack((img_arr[i] for i in range(img_arr.shape[0])))
+    img_merge = Image.fromarray(img_merge)
+    print('Buckets:')
+    print(y)
+    img_merge.save('merged.jpg')
+
+
 def baseline(args):
     n_classes = 100
     _, _, prices = preprocessing.load_tabular_data()
@@ -161,6 +179,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                       tokenizer=tokenizer, maxlen=config.max_seq_len, mode='val'
                                   ), steps_per_epoch=int(20000/config.batch_size), validation_steps=int(len(val_img_files)/config.batch_size))
 
+
 def evaluate(args):
     model, config = load_model(args.name)
     if args.test:
@@ -171,7 +190,7 @@ def evaluate(args):
     img_files = os.listdir(mode + '_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
-    if config is None:
+    '''if config is None:
         img_only_model = True
         word_index, tokenizer = util.tokenize_texts(text_data)
         embedding_matrix = util.load_embedding_matrix(word_index)
@@ -179,27 +198,24 @@ def evaluate(args):
                     trainable_convnet_layers=10,
                     n_classes=100, lr=0.0001, reg_weight=0.01)
     else:
-        img_only_model = False
+        img_only_model = False'''
 
     bins = util.get_bins(prices, num=config.n_classes)
 
     results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
-        tokenizer=config.tokenizer, maxlen=config.max_seq_len, img_only=img_only_model), steps=int(len(img_files)/config.batch_size)
+        tokenizer=config.tokenizer, maxlen=config.max_seq_len), steps=int(len(img_files)/config.batch_size)
     )
     print(results)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                     False, len(img_files), mode)
-    if img_only_model:
-        x = x[1]
+    '''if img_only_model:
+        x = x[1]'''
     predictions = model.predict(x)
 
     util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_' + mode)
-    #np.savetxt('bins.csv', bins, delimiter=',')
-    #np.savetxt('train_preds_CNN.csv', predictions, delimiter=',')
-
 
 
 
@@ -264,6 +280,9 @@ if __name__ == '__main__':
                                 help="load model with selected name")
     command_parser.add_argument('-t', '--test', action='store_true', default=False, help="Do on test set. default is validation set")
     command_parser.set_defaults(func=evaluate)
+
+    command_parser = subparsers.add_parser('vis', help='evaluate model')
+    command_parser.set_defaults(func=visualize)
 
 
     ARGS = parser.parse_args()
