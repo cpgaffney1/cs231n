@@ -187,14 +187,30 @@ def save_file(x, name):
     return preprocessed_num_data'''
 
 
-def preprocess_numeric_data(num_data_orig, additional_data, num_features=2):
-    num_data = np.zeros((num_data_orig.shape[0], num_features))
-    zips = num_data_orig[:, 0]
-    prices = num_data_orig[:, 3]
-    num_data[:, 0] = prices
-    num_data[:, 1:3] = num_data_orig[:, 1:3]
-    #num_data[:, 3:] = additional_data[:, :]
-    #num_data = fill_missing_hpi(num_data, 0, 20, missing_indicator=np.nan)
+
+def preprocess_numeric_data(num_data_orig, additional_data):
+    if additional_data is not None:
+        ZIP_COL = 0
+        HPI_COL = 20
+        additional_data = fill_missing_hpi(additional_data, ZIP_COL, HPI_COL, missing_indicator=np.nan)
+        zip_to_additional_data = {}
+        for i in range(additional_data.shape[0]):
+            ######## ASSUME ZIP IS IN FIRST COLUMN !!!!!!!!!!!!!!!!!!!!!!!!!!
+            zip_to_additional_data[additional_data[i][ZIP_COL]] = additional_data[i][1:]
+    if additional_data is not None:
+        num_features = additional_data.shape[1] + 2
+    else:
+        num_features = 2
+    num_data = {}
+    for zpid, data in enumerate(num_data_orig):
+        zip, beds, baths, price = data
+        data = np.zeros(num_features + 1)
+        data[0] = price
+        data[1] = beds
+        data[2] = baths
+        if additional_data is not None:
+            data[3:] = additional_data[zip]
+        num_data[zpid] = data
     return num_data
 
 

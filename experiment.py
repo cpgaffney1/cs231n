@@ -85,6 +85,7 @@ def train(args):
     if not os.path.exists('models/'):
         os.mkdir('models/')
 
+    #numeric data is a map of zpid to tuple of (zip, beds, baths, price)
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
 
     word_index, tokenizer = util.tokenize_texts(text_data)
@@ -120,8 +121,9 @@ def train(args):
                 model_folder = ''
 
     additional_num_data = None#np.genfromtxt('FILENAME', skip_header=1, missing_values=[], filling_values=[np.nan], )
-    numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data, num_features=config.numeric_input_size)
+    numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     bins = util.get_bins(prices, num=config.n_classes)
+    exit()
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer)
 
 '''
@@ -175,7 +177,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                                  batch_size=config.batch_size, tokenizer=tokenizer, maxlen=config.max_seq_len),
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
                                   validation_data=util.generator(
-                                      val_img_files, numeric_data, text_data, bins, img_shape=config.img_shape, batch_size=config.batch_size,
+                                      val_img_files, numeric_data, text_data, bins,
+                                      img_shape=config.img_shape, batch_size=config.batch_size,
                                       tokenizer=tokenizer, maxlen=config.max_seq_len, mode='val'
                                   ), steps_per_epoch=int(20000/config.batch_size), validation_steps=int(len(val_img_files)/config.batch_size))
 
