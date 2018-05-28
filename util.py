@@ -193,8 +193,8 @@ def preprocess_numeric_data(num_data_orig, additional_data, num_features=2):
     prices = num_data_orig[:, 3]
     num_data[:, 0] = prices
     num_data[:, 1:3] = num_data_orig[:, 1:3]
-    num_data[:, 3:] = additional_data[:, :]
-    num_data = fill_missing_hpi(num_data, 0, 20, missing_indicator=np.nan)
+    #num_data[:, 3:] = additional_data[:, :]
+    #num_data = fill_missing_hpi(num_data, 0, 20, missing_indicator=np.nan)
     return num_data
 
 

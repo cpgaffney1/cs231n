@@ -119,7 +119,7 @@ def train(args):
             else:
                 model_folder = ''
 
-    additional_num_data = np.genfromtxt('FILENAME', skip_header=1, missing_values=[], filling_values=[np.nan], )
+    additional_num_data = None#np.genfromtxt('FILENAME', skip_header=1, missing_values=[], filling_values=[np.nan], )
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data, num_features=config.numeric_input_size)
     bins = util.get_bins(prices, num=config.n_classes)
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer)
