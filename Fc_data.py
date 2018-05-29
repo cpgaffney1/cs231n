@@ -25,7 +25,7 @@ def fc_data():
         if(not filled):
             result[i, result.shape[1] - 1] = np.nan
         filled = False
-
+    print('saving')
     np.save('tabular_data/add_num_data.npy',result)
 
     
