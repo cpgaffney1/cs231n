@@ -7,6 +7,8 @@ import csv
 from PIL import Image
 import pickle
 import keras.backend as K
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import keras.losses as losses
 from keras.preprocessing.sequence import pad_sequences
@@ -223,7 +225,7 @@ def evaluate(args):
         img_only_model = False'''
 
     bins = util.get_bins(prices, num=config.n_classes)
-
+    print('Beginning evaluation...')
     results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
@@ -237,9 +239,10 @@ def evaluate(args):
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
     x[2] = sequences
     predictions = model.predict(x)
-
+    print('Writing confusion matrix...')
     util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_' + mode)
-
+    print('Visualizing saliency...')
+    show_saliency(model, x, y, mode)
 
 
 def show_saliency(model, x, y, mode, img_only_model=False):
