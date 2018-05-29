@@ -28,4 +28,4 @@ def fc_data():
     print('saving')
     np.save('tabular_data/add_num_data.npy',result)
 
-    
+fc_data()
