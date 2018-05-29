@@ -9,6 +9,8 @@ import pickle
 import keras.backend as K
 import matplotlib.pyplot as plt
 import keras.losses as losses
+from keras.preprocessing.sequence import pad_sequences
+
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger, ModelCheckpoint
 
 from sklearn.linear_model import LogisticRegression
@@ -33,13 +35,24 @@ def visualize(args):
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
                                 True, 8, 'train')
     img_list = x[1]
-    img_merge = np.hstack((img_list[i] for i in range(len(img_list))))
-    print(img_merge.shape)
-    img_merge = Image.fromarray(img_merge, 'RGB')
-    print(img_merge.size)
+
+    '''widths, heights = zip(*(i.size for i in images))
+
+    total_width = sum(widths)
+    max_height = max(heights)
+
+    new_im = Image.new('RGB', (total_width, max_height))
+
+    x_offset = 0
+    for im in images:
+        new_im.paste(im, (x_offset, 0))
+        x_offset += im.size[0]
+
+    new_im.save('test.jpg')
+
     print('Buckets:')
     print(y)
-    img_merge.save('merged.jpg')
+    img_merge.save('merged.jpg')'''
 
 
 def baseline(args):
@@ -94,6 +107,7 @@ def train(args):
 
     word_index, tokenizer = util.tokenize_texts(text_data)
     embedding_matrix = util.load_embedding_matrix(word_index)
+    additional_num_data = np.load('tabular_data/add_num_data.npy')
 
     if args.trainable_layers is None:
         trainable_convnet_layers = 10
@@ -109,7 +123,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only)
+                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -124,9 +138,6 @@ def train(args):
             else:
                 model_folder = ''
 
-    additional_num_data = np.load('tabular_data/add_num_data.npy')
-    print(additional_num_data[0])
-    exit()
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     bins = util.get_bins(prices, num=config.n_classes)
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer)
@@ -197,6 +208,9 @@ def evaluate(args):
 
     img_files = os.listdir(mode + '_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
+    additional_num_data = np.load('tabular_data/add_num_data.npy')
+    numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
+
 
     '''if config is None:
         img_only_model = True
@@ -218,9 +232,10 @@ def evaluate(args):
     print(results)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
-                    False, len(img_files), mode)
-    '''if img_only_model:
-        x = x[1]'''
+                                False, len(img_files), mode)
+    sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
+    sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
+    x[2] = sequences
     predictions = model.predict(x)
 
     util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_' + mode)
