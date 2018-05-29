@@ -55,7 +55,6 @@ def build_model(config):
     x = GlobalAveragePooling2D()(cnn_out)
     x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
-    x = Dropout(config.drop_prob)(x)
     cnn_out = x
 
     #running fc
@@ -78,17 +77,16 @@ def build_model(config):
     # to top layer of text network
 
     #concat them
-    if config.img_only:
+    if True:#config.img_only:
         x = cnn_out
     else:
         x = concatenate([cnn_out, fc_out, rnn_out])
 
     predictions = Dense(config.n_classes, activation='softmax', name='main_output', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
 
-    #Define Model 3 inputs and 1 output (Missing Rnn Input)
     model = Model(inputs=[numeric_inputs, image_model.input, text_inputs], outputs=predictions)
 
-    if weights is not None and config.freeze_cnn:
+    if False:#weights is not None and config.freeze_cnn:
         for i in range(len(image_model.layers) - config.trainable_convnet_layers):
            image_model.layers[i].trainable = False
 
