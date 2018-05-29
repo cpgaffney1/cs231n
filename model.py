@@ -77,7 +77,7 @@ def build_model(config):
     # to top layer of text network
 
     #concat them
-    if True:#config.img_only:
+    if config.img_only:
         x = cnn_out
     else:
         x = concatenate([cnn_out, fc_out, rnn_out])
