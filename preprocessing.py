@@ -129,8 +129,6 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
         returned_image = util.crop(img_arrays[i], shape=(desired_shape[0], desired_shape[1]), random=True)
         imgs[i] = returned_image
 
-    img = Image.fromarray(imgs[0], 'RGB')
-    img.show()
     return imgs, ordered_numeric_data, ordered_descriptions, ordered_addresses
 
 ###########################

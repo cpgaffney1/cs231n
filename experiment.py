@@ -123,7 +123,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
+                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -177,7 +177,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
     global loaded_descriptions
 
     train_img_files = os.listdir('imgs/')[:256]
-    val_img_files = os.listdir('val_imgs/')[:10]
+    val_img_files = os.listdir('val_imgs/')[:64]
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)

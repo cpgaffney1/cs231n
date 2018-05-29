@@ -244,9 +244,8 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
     img_data_batch = img_data_batch.astype(np.float32)
     img_data_batch = preprocess_input(img_data_batch)
     y_batch, numeric_data_batch = remove_price_array_from_numeric_data(numeric_data_batch)
-    print(y_batch[0])
-    print(buckets(y_batch, bins)[0])
-    exit()
+    '''print(y_batch[0])
+    print(buckets(y_batch, bins)[0])'''
     #numeric_data_batch = preprocess_numeric_data(numeric_data_batch)
     return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins)
 
