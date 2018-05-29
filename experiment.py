@@ -226,12 +226,12 @@ def evaluate(args):
 
     bins = util.get_bins(prices, num=config.n_classes)
     print('Beginning evaluation...')
-    results = model.evaluate_generator(util.generator(
+    '''results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
         tokenizer=config.tokenizer, maxlen=config.max_seq_len), steps=int(len(img_files)/config.batch_size)
     )
-    print(results)
+    print(results)'''
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                                 False, len(img_files), mode)
@@ -240,13 +240,15 @@ def evaluate(args):
     x[2] = sequences
     predictions = model.predict(x)
     print('Writing confusion matrix...')
+    np.savetxt('preds_neural.csv', np.argmax(predictions, axis=-1), delimiter=',')
+    np.savetxt('actual.csv', y, delimiter=',')
     util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_' + mode)
     print('Visualizing saliency...')
     show_saliency(model, x, y, mode)
 
 
 def show_saliency(model, x, y, mode, img_only_model=False):
-    indices = np.arange(0, x.shape[0])
+    indices = np.arange(0, x[0].shape[0])
     np.random.shuffle(indices)
     indices = indices[:64]
     x = [x[0][indices], x[1][indices], x[2][indices]]
