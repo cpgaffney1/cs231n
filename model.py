@@ -50,9 +50,9 @@ def build_model(config):
         weights = None
     image_model = Xception(input_shape=config.img_shape, include_top=False, weights=weights)
     #freeze lower layers
-    if weights is not None and config.freeze_cnn:
+    '''if weights is not None and config.freeze_cnn:
         for i in range(len(image_model.layers) - config.trainable_convnet_layers):
-           image_model.layers[i].trainable = False
+           image_model.layers[i].trainable = False'''
 
     cnn_out = image_model(img_inputs)
     cnn_out = Flatten()(cnn_out)
