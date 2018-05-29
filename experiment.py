@@ -173,8 +173,8 @@ def optimize_params(word_index, embedding_matrix, n_trials=1000):
 
 
 def train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer):
-    train_img_files = os.listdir('imgs/')[:256]
-    val_img_files = os.listdir('val_imgs/')[:256]
+    train_img_files = os.listdir('imgs/')
+    val_img_files = os.listdir('val_imgs/')
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
