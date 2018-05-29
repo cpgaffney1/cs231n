@@ -125,7 +125,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=False, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
+                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
