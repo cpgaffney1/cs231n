@@ -114,7 +114,7 @@ def train(args):
     else:
         trainable_convnet_layers = int(args.trainable_layers)
     if args.reg_weight is None:
-        reg_weight = 0.01
+        reg_weight = 0.001
     else:
         reg_weight = float(args.reg_weight)
 
@@ -123,7 +123,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
+                    n_classes=100, lr=0.001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -176,8 +176,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
     global loaded_numeric_data
     global loaded_descriptions
 
-    train_img_files = os.listdir('imgs/')
-    val_img_files = os.listdir('val_imgs/')
+    train_img_files = os.listdir('imgs/')[:256]
+    val_img_files = os.listdir('val_imgs/')[:10]
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
@@ -196,7 +196,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                       val_img_files, numeric_data, text_data, bins,
                                       img_shape=config.img_shape, batch_size=config.batch_size,
                                       tokenizer=tokenizer, maxlen=config.max_seq_len, mode='val'
-                                  ), steps_per_epoch=int(20000/config.batch_size), validation_steps=int(len(val_img_files)/config.batch_size))
+                                  ), steps_per_epoch=int(len(train_img_files)/2/config.batch_size), validation_steps=int(len(val_img_files)/config.batch_size))
 
 
 def evaluate(args):
