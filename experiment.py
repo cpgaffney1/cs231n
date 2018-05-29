@@ -178,8 +178,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
     global loaded_numeric_data
     global loaded_descriptions
 
-    train_img_files = os.listdir('imgs/')[:256]
-    val_img_files = os.listdir('val_imgs/')[:64]
+    train_img_files = os.listdir('imgs/')
+    val_img_files = os.listdir('val_imgs/')
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
