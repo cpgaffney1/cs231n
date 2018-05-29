@@ -189,6 +189,8 @@ def save_file(x, name):
 
 
 def preprocess_numeric_data(num_data_orig, additional_data):
+    #normalize additional data. Not necessary for orig because small numbers
+    additional_data = (additional_data - np.mean(additional_data, axis=0)) / np.std(additional_data, axis=0)
     if additional_data is not None:
         ZIP_COL = 0
         HPI_COL = -1

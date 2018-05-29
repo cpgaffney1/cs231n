@@ -125,7 +125,8 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
+                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
+                        freeze_cnn=True)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -183,7 +184,6 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
-
 
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, write_grads=True)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
