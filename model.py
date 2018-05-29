@@ -13,7 +13,7 @@ class Config:
     numeric_input_size = 2
     img_shape = (224,224,3)
     n_classes = 1000
-    batch_size = 64
+    batch_size = 32
     embed_dim = 50
     max_seq_len = 30
     def __init__(self, word_index, embedding_matrix, tokenizer, lr=0.001, n_recurrent_layers=1, n_numeric_layers=3,

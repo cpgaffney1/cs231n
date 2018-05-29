@@ -240,6 +240,7 @@ def evaluate(args):
     x[2] = sequences
     predictions = model.predict(x)
     print('Writing confusion matrix...')
+    print(np.argmax(predictions, axis=-1).shape)
     np.savetxt('preds_neural.csv', np.argmax(predictions, axis=-1), delimiter=',')
     np.savetxt('actual.csv', y, delimiter=',')
     util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_' + mode)
@@ -256,13 +257,13 @@ def show_saliency(model, x, y, mode, img_only_model=False):
 
     label_tensor = K.constant(y)
     if img_only_model:
-        fn = K.function(model.inputs,
-                        K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]),
-                                    model.inputs))
-    else:
         fn = K.function([model.inputs[0]],
                         K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]),
                                     [model.inputs[0]]))
+    else:
+        fn = K.function(model.inputs,
+                        K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]),
+                                    model.inputs))
     grads = fn([x])
     grads = grads[0]
 
