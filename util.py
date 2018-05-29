@@ -189,12 +189,12 @@ def save_file(x, name):
 
 
 def preprocess_numeric_data(num_data_orig, additional_data):
-    #normalize additional data. Not necessary for orig because small numbers
-    additional_data = (additional_data - np.mean(additional_data, axis=0)) / np.std(additional_data, axis=0)
     if additional_data is not None:
         ZIP_COL = 0
         HPI_COL = -1
         additional_data = fill_missing_hpi(additional_data, ZIP_COL, HPI_COL)
+        additional_data[:, 1:] = (additional_data[:, 1:] - np.mean(additional_data[:, 1:], axis=0)) / (
+                np.std(additional_data[:, 1:], axis=0) + 0.000001)
         zip_to_additional_data = {}
         for i in range(additional_data.shape[0]):
             ######## ASSUME ZIP IS IN FIRST COLUMN !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -241,8 +241,8 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
     img_data_batch, numeric_data_batch, descriptions_batch, addresses_batch = \
         preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size, replace=False),
                                          text_data, numeric_data, desired_shape=img_shape, verbose=verbose, mode=mode)
-    img = Image.fromarray(img_data_batch[0], 'RGB')
-    img.show()
+    '''img = Image.fromarray(img_data_batch[0], 'RGB')
+    img.show()'''
     img_data_batch = img_data_batch.astype(np.float32)
     img_data_batch = preprocess_input(img_data_batch)
     y_batch, numeric_data_batch = remove_price_array_from_numeric_data(numeric_data_batch)

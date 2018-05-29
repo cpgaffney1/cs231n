@@ -1,4 +1,4 @@
-from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, Dropout, BatchNormalization
+from keras.layers import Input, Dense, Conv2D, MaxPool2D, Flatten, concatenate, LSTM, Dropout, BatchNormalization, GlobalAveragePooling2D
 from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
@@ -12,7 +12,7 @@ import keras.losses as losses
 class Config:
     numeric_input_size = 2
     img_shape = (224,224,3)
-    n_classes = 1000
+    n_classes = 100
     batch_size = 32
     embed_dim = 50
     max_seq_len = 30
@@ -48,17 +48,13 @@ def build_model(config):
         weights = 'imagenet'
     else:
         weights = None
-    image_model = Xception(input_shape=config.img_shape, include_top=False, weights=weights)
+    image_model = Xception(include_top=False, weights=weights)
     #freeze lower layers
-    if weights is not None and config.freeze_cnn:
-        for i in range(len(image_model.layers) - config.trainable_convnet_layers):
-           image_model.layers[i].trainable = False
 
-    cnn_out = image_model(img_inputs)
-    cnn_out = Flatten()(cnn_out)
-    x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(cnn_out)
-    for i in range(config.n_convnet_fc_layers):
-        x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+    cnn_out = image_model.output
+    x = GlobalAveragePooling2D()(cnn_out)
+    x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+    x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     x = Dropout(config.drop_prob)(x)
     cnn_out = x
 
@@ -90,10 +86,30 @@ def build_model(config):
     predictions = Dense(config.n_classes, activation='softmax', name='main_output', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
 
     #Define Model 3 inputs and 1 output (Missing Rnn Input)
-    model = Model(inputs=[numeric_inputs, img_inputs, text_inputs], outputs=predictions)
+    model = Model(inputs=[numeric_inputs, image_model.input, text_inputs], outputs=predictions)
+
+    if weights is not None and config.freeze_cnn:
+        for i in range(len(image_model.layers) - config.trainable_convnet_layers):
+           image_model.layers[i].trainable = False
+
     opt = Adam(lr=config.lr)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
+
+    '''xception_model = Xception(weights='imagenet', include_top=False)
+    x = xception_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(256, activation='relu')(x)
+
+    predictions = Dense(100, activation='softmax')(x)
+
+    model = Model(inputs=xception_model.input, outputs=predictions)
+    for layer in xception_model.layers:
+        layer.trainable = False
+
+    model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
+    '''
     return model
+
 
 import os
 import pickle

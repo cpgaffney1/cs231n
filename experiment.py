@@ -116,7 +116,7 @@ def train(args):
     else:
         trainable_convnet_layers = int(args.trainable_layers)
     if args.reg_weight is None:
-        reg_weight = 0.001
+        reg_weight = 0.01
     else:
         reg_weight = float(args.reg_weight)
 
@@ -125,8 +125,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
-                        freeze_cnn=True)
+                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -174,11 +173,6 @@ def optimize_params(word_index, embedding_matrix, n_trials=1000):
 
 
 def train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer):
-    best_val_loss = float('inf')
-    global loaded_img_data
-    global loaded_numeric_data
-    global loaded_descriptions
-
     train_img_files = os.listdir('imgs/')
     val_img_files = os.listdir('val_imgs/')
 
@@ -226,12 +220,12 @@ def evaluate(args):
 
     bins = util.get_bins(prices, num=config.n_classes)
     print('Beginning evaluation...')
-    '''results = model.evaluate_generator(util.generator(
+    results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
         tokenizer=config.tokenizer, maxlen=config.max_seq_len), steps=int(len(img_files)/config.batch_size)
     )
-    print(results)'''
+    print(results)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                                 False, len(img_files), mode)
