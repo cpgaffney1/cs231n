@@ -33,10 +33,10 @@ def visualize(args):
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
                                 True, 8, 'train')
     img_list = x[1]
-    img_merge = np.vstack((img_list[i] for i in range(len(img_list))))
+    img_merge = np.hstack((img_list[i] for i in range(len(img_list))))
     print(img_merge.shape)
-    img_merge = Image.fromarray(img_merge)
-    print(img_merge.shape)
+    img_merge = Image.fromarray(img_merge, 'RGB')
+    print(img_merge.size)
     print('Buckets:')
     print(y)
     img_merge.save('merged.jpg')
