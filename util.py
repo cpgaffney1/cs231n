@@ -191,7 +191,7 @@ def save_file(x, name):
 def preprocess_numeric_data(num_data_orig, additional_data):
     if additional_data is not None:
         ZIP_COL = 0
-        HPI_COL = 20
+        HPI_COL = -1
         additional_data = fill_missing_hpi(additional_data, ZIP_COL, HPI_COL, missing_indicator=np.nan)
         zip_to_additional_data = {}
         for i in range(additional_data.shape[0]):
@@ -202,17 +202,16 @@ def preprocess_numeric_data(num_data_orig, additional_data):
     else:
         num_features = 2
     num_data = {}
-    for zpid, data in enumerate(num_data_orig):
-        zip, beds, baths, price = data
+    for zpid in num_data_orig.keys():
+        zip, beds, baths, price = num_data_orig[zpid]
         data = np.zeros(num_features + 1)
         data[0] = price
         data[1] = beds
         data[2] = baths
         if additional_data is not None:
-            data[3:] = additional_data[zip]
+            data[3:] = additional_data[int(zip)]
         num_data[zpid] = data
     return num_data
-
 
 def fill_missing_hpi(num_data, zip_col, hpi_col, missing_indicator=np.nan):
     zips_sorted = sorted(num_data[:, zip_col])

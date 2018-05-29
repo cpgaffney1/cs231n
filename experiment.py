@@ -31,11 +31,12 @@ def visualize(args):
     bins = util.get_bins(prices, num=n_classes)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
-                                True, 6, 'train')
-    img_arr = x[1]
-
-    img_merge = np.vstack((img_arr[i] for i in range(img_arr.shape[0])))
+                                True, 8, 'train')
+    img_list = x[1]
+    img_merge = np.vstack((img_list[i] for i in range(len(img_list))))
+    print(img_merge.shape)
     img_merge = Image.fromarray(img_merge)
+    print(img_merge.shape)
     print('Buckets:')
     print(y)
     img_merge.save('merged.jpg')
@@ -68,9 +69,12 @@ def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, re
     train_pred = reg.predict(x_train)
     dev_pred = reg.predict(x_dev)
 
+    print('Train scores')
     print(reg.score(x_train, y_train))
+    print('Validation scores')
     print(reg.score(x_dev, y_dev))
-
+    print('Test scores')
+    print(reg.score(x_test, y_test))
     np.savetxt('train_preds_linear.csv', train_pred, delimiter=',')
     np.savetxt('train_actual_linear.csv', y_train, delimiter=',')
     np.savetxt('bins.csv', bins, delimiter=',')
@@ -105,7 +109,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.0001, reg_weight=reg_weight)
+                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -120,10 +124,11 @@ def train(args):
             else:
                 model_folder = ''
 
-    additional_num_data = None#np.genfromtxt('FILENAME', skip_header=1, missing_values=[], filling_values=[np.nan], )
+    additional_num_data = np.load('tabular_data/add_num_data.npy')
+    print(additional_num_data[0])
+    exit()
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     bins = util.get_bins(prices, num=config.n_classes)
-    exit()
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer)
 
 '''
@@ -272,6 +277,8 @@ if __name__ == '__main__':
                                 help="Set reg weight param")
     command_parser.add_argument('-tl', action='store', dest='trainable_layers',
                                 help="Set trainable layers params")
+    command_parser.add_argument('-i', '--img_only', action='store_true', default=False, help="Only use img input")
+
     command_parser.set_defaults(func=train)
 
     command_parser = subparsers.add_parser('base', help='trains baseline model')

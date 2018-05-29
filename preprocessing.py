@@ -116,7 +116,7 @@ def process_data_batch(filenames, text_data, numeric_data, desired_shape=(299,29
 
     ordered_descriptions = [''] * N
     ordered_addresses = [''] * N
-    n_numeric_features = len(numeric_data.keys().pop())
+    n_numeric_features = len(next(iter(numeric_data.values())))
     ordered_numeric_data = np.zeros((N, n_numeric_features))
     for zpid in zpid_list.keys():
         index = zpid_list[zpid]
