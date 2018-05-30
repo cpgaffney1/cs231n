@@ -260,7 +260,12 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         imgs = x[1]
         datagen = ImageDataGenerator(
             rotation_range=20,
-            horizontal_flip=True)
+            horizontal_flip=True,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.2,
+            zoom_range=0.1
+        )
         datagen.fit(imgs)
         for imgs, y in datagen.flow(imgs, y, batch_size=batch_size):
             break

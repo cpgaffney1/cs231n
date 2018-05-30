@@ -116,7 +116,7 @@ def train(args):
     else:
         trainable_convnet_layers = int(args.trainable_layers)
     if args.reg_weight is None:
-        reg_weight = 0.001
+        reg_weight = 0.01
     else:
         reg_weight = float(args.reg_weight)
 

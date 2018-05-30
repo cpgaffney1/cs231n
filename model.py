@@ -54,7 +54,7 @@ def build_model(config):
     cnn_out = image_model.output
     x = GlobalAveragePooling2D()(cnn_out)
     x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
-    x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+    x = Dropout(config.drop_prob)(x)
     cnn_out = x
 
     #running fc
@@ -71,7 +71,7 @@ def build_model(config):
     embedded_seqs = embedding_layer(text_inputs)
     lstm = LSTM(64)(embedded_seqs)
     for i in range(config.n_recurrent_layers - 1):
-        lstm = LSTM(32)(lstm)
+        lstm = LSTM(32, kernel_regularizer=regularizers.l2(config.reg_weight))(lstm)
     rnn_out = lstm
     #rnn_out
     # to top layer of text network
