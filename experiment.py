@@ -75,6 +75,9 @@ def baseline(args):
     logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, reg=reg)
 
 def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, reg=None):
+    np.savetxt('train_actual_linear.csv', y_train, delimiter=',')
+    np.savetxt('bins.csv', bins, delimiter=',')
+
     if reg is None:
         print('Beginning regression')
         reg = LogisticRegression(verbose=10, multi_class='multinomial', solver='saga')
@@ -91,8 +94,7 @@ def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, re
     print('Test scores')
     print(reg.score(x_test, y_test))
     np.savetxt('train_preds_linear.csv', train_pred, delimiter=',')
-    np.savetxt('train_actual_linear.csv', y_train, delimiter=',')
-    np.savetxt('bins.csv', bins, delimiter=',')
+
 
     util.conf_matrix(y_train, train_pred, 100, suffix='_' + 'linear')
 
