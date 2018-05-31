@@ -193,8 +193,8 @@ def preprocess_numeric_data(num_data_orig, additional_data):
         ZIP_COL = 0
         HPI_COL = -1
         additional_data = fill_missing_hpi(additional_data, ZIP_COL, HPI_COL)
-        #additional_data[:, 1:] = (additional_data[:, 1:] - np.mean(additional_data[:, 1:], axis=0)) / (
-        #        np.std(additional_data[:, 1:], axis=0) + 0.000001)
+        additional_data[:, 1:] = (additional_data[:, 1:] - np.mean(additional_data[:, 1:], axis=0)) / (
+                np.std(additional_data[:, 1:], axis=0) + 0.000001)
         zip_to_additional_data = {}
         for i in range(additional_data.shape[0]):
             ######## ASSUME ZIP IS IN FIRST COLUMN !!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -267,7 +267,6 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             break'''
         sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))
         sequences = pad_sequences(sequences, maxlen=maxlen)
-
         yield [x[0], imgs, sequences], y
         '''if img_only:
             yield imgs, y
