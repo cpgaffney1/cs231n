@@ -60,13 +60,12 @@ def build_model(config):
     cnn_out = x
 
     #running fc
-    #x = BatchNormalization()(numeric_inputs)
     x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(numeric_inputs)
     x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+    x = Dropout(config.drop_prob)(x)
     x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     x = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
-    #x = Dropout(config.drop_prob)(x)
-    #x = Dense(128, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
+    x = Dropout(config.drop_prob)(x)
     fc_out = x
 
     #running RNN
