@@ -58,7 +58,7 @@ def visualize(args):
 
 
 def baseline(args):
-    n_classes = 100
+    n_classes = 30
     _, _, prices = preprocessing.load_tabular_data()
     bins = util.get_bins(prices, num=n_classes)
     x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
@@ -127,7 +127,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         if args.rnn_only:
-            n_classes = 100
+            n_classes = 30
         else:
             n_classes = 30
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
