@@ -3,7 +3,7 @@ from keras.models import Model
 from keras.applications.xception import Xception
 from keras.applications.mobilenet import MobileNet
 from keras.applications.resnet50 import ResNet50
-from keras.optimizers import Adam
+from keras.optimizers import Adam, SGD
 from keras.layers import Embedding
 import keras.regularizers as regularizers
 import keras.losses as losses
@@ -95,7 +95,7 @@ def build_model(config):
         for i in range(len(image_model.layers) - config.trainable_convnet_layers):
            image_model.layers[i].trainable = False
 
-    opt = Adam(lr=config.lr)
+    opt = SGD(lr=config.lr, momentum=0.9, nesterov=True)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
 
     '''xception_model = Xception(weights='imagenet', include_top=False)
