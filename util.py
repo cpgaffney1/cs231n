@@ -81,7 +81,7 @@ def buckets(x, bins):
     return y
 
 def get_bins(prices, num=100):
-    bins = np.geomspace(0, 10e6, num=num)
+    bins = np.geomspace(1, 10e6, num=num)
     return bins
 
 
