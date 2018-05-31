@@ -181,8 +181,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
         train_img_files = train_img_files[:128]
         val_img_files = val_img_files[:128]
 
-    #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
-    #                              patience=4, min_lr=0.00001, cooldown=3)
+    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
+                                  patience=3, min_lr=0.0000001, cooldown=3)
 
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, write_grads=True)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
@@ -192,7 +192,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
         pickle.dump(config, pickle_file)
     history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
                                                  batch_size=config.batch_size, tokenizer=tokenizer, maxlen=config.max_seq_len),
-                                  epochs=100, callbacks=[tensorboard, csvlogger, saver],
+                                  epochs=100, callbacks=[tensorboard, csvlogger, saver, reduce_lr],
                                   validation_data=util.generator(
                                       val_img_files, numeric_data, text_data, bins,
                                       img_shape=config.img_shape, batch_size=config.batch_size,
