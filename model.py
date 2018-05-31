@@ -102,19 +102,6 @@ def build_model(config):
     opt = Adam(lr=config.lr)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
 
-    '''xception_model = Xception(weights='imagenet', include_top=False)
-    x = xception_model.output
-    x = GlobalAveragePooling2D()(x)
-    x = Dense(256, activation='relu')(x)
-
-    predictions = Dense(100, activation='softmax')(x)
-
-    model = Model(inputs=xception_model.input, outputs=predictions)
-    for layer in xception_model.layers:
-        layer.trainable = False
-
-    model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
-    '''
     return model
 
 

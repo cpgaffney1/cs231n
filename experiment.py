@@ -126,8 +126,12 @@ def train(args):
         model, config = load_model(args.folder)
         model_folder = 'models/' + args.folder + '/'
     else:
+        if args.rnn_only:
+            n_classes = 100
+        else:
+            n_classes = 30
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=30, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
+                    n_classes=n_classes, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
                         numeric_only=args.numeric_only)
         model = build_model(config)
         if args.name is not None:
@@ -209,7 +213,9 @@ def evaluate(args):
     )
     print(results)
 
-    x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
+    train_img_files = os.listdir(mode + '_imgs/')
+    np.random.shuffle(train_img_files)
+    x, y = util.load_data_batch(train_img_files[:256], numeric_data, text_data, bins, config.img_shape,
                                 False, len(img_files), mode)
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
@@ -276,6 +282,7 @@ if __name__ == '__main__':
                                 help="Set trainable layers params")
     command_parser.add_argument('-i', '--img_only', action='store_true', default=False, help="Only use img input")
     command_parser.add_argument('-num', '--numeric_only', action='store_true', default=False, help="Only use numeric input")
+    command_parser.add_argument('-rnn', '--rnn_only', action='store_true', default=False, help="Only use rnn input")
     command_parser.add_argument('-o', '--overfit', action='store_true', default=False, help="Try to overfit on small dataset")
 
 
