@@ -203,7 +203,7 @@ def preprocess_numeric_data(num_data_orig, additional_data):
     if additional_data is not None:
         num_features = additional_data.shape[1] + 2
     else:
-        num_features = 2
+        num_features = 3
     num_data = {}
     count = 0
     for zpid in num_data_orig.keys():

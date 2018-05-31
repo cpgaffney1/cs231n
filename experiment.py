@@ -34,13 +34,15 @@ def visualize(args):
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
     bins = util.get_bins(prices, num=n_classes)
 
+    additional_num_data = np.load('tabular_data/add_num_data.npy')
+    numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
+
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
                                 True, len(img_files), 'train')
-    print(np.max(util.buckets(prices, bins)))
-    print(np.max(y))
-    exit()
+    x=x[1]
+
     found_indices = [-1, -1, -1, -1, -1]
-    index = 0
+    index = len(x)-1
     while(np.min(found_indices) == -1):
         if index % 100 == 0:
             print(found_indices)
@@ -54,8 +56,10 @@ def visualize(args):
             found_indices[3] = index
         else:
             found_indices[4] = index
-        index += 1
+        index -= 1
 
+    found_indices = np.asarray(found_indices, dtype='int32')
+    print(found_indices)
     img_list = x[found_indices]
     labels = y[found_indices]
 
