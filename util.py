@@ -77,9 +77,10 @@ def crop(image, shape=(299, 299), random=False):
 
 def buckets(x, bins):
     y = np.digitize(x, bins, right=False)
+    print(y)
     return y
 
-def get_bins(prices, num=1000):
+def get_bins(prices, num=100):
     bins = np.geomspace(10000, 10e6, num=num)
     return bins
 
