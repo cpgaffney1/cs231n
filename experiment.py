@@ -29,32 +29,43 @@ TEST_PHASE = 1
 
 def visualize(args):
     img_files = os.listdir('imgs/')
-    n_classes = 100
+    n_classes = 50
     img_shape = (224,224,3)
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
     bins = util.get_bins(prices, num=n_classes)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
-                                True, 8, 'train')
-    img_list = x[1]
+                                True, len(img_files), 'train')
+    print(np.max(util.buckets(prices, bins)))
+    print(np.max(y))
+    exit()
+    found_indices = [-1, -1, -1, -1, -1]
+    index = 0
+    while(np.min(found_indices) == -1):
+        if index % 100 == 0:
+            print(found_indices)
+        if y[index] < 10:
+            found_indices[0] = index
+        elif y[index] < 20:
+            found_indices[1] = index
+        elif y[index] < 30:
+            found_indices[2] = index
+        elif y[index] < 40:
+            found_indices[3] = index
+        else:
+            found_indices[4] = index
+        index += 1
 
-    '''widths, heights = zip(*(i.size for i in images))
+    img_list = x[found_indices]
+    labels = y[found_indices]
 
-    total_width = sum(widths)
-    max_height = max(heights)
+    img_arr = np.concatenate(img_list)
+    merged_img = Image.fromarray(img_arr)
 
-    new_im = Image.new('RGB', (total_width, max_height))
-
-    x_offset = 0
-    for im in images:
-        new_im.paste(im, (x_offset, 0))
-        x_offset += im.size[0]
-
-    new_im.save('test.jpg')
+    merged_img.save('merged_images.jpg')
 
     print('Buckets:')
-    print(y)
-    img_merge.save('merged.jpg')'''
+    print(labels)
 
 
 def baseline(args):
