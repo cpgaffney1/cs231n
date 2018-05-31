@@ -18,7 +18,8 @@ class Config:
     max_seq_len = 30
     def __init__(self, word_index, embedding_matrix, tokenizer, lr=0.001, n_recurrent_layers=1, n_numeric_layers=3,
                  trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=1, n_convnet_fc_layers=2,
-                 n_classes=100, drop_prob=0.5, reg_weight=0.01, img_only=False, numeric_input_size=2, freeze_cnn=True):
+                 n_classes=100, drop_prob=0.5, reg_weight=0.01, img_only=False, numeric_input_size=2, freeze_cnn=True,
+                 numeric_only=False):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
         self.vocab_size = len(word_index)
@@ -37,6 +38,7 @@ class Config:
         self.img_only=img_only
         self.numeric_input_size = numeric_input_size
         self.freeze_cnn = freeze_cnn
+        self.numeric_only = numeric_only
 
 def build_model(config):
     img_inputs = Input(shape=config.img_shape, name='img_input')
@@ -80,6 +82,8 @@ def build_model(config):
     #concat them
     if config.img_only:
         x = cnn_out
+    elif config.numeric_only:
+        x = fc_out
     else:
         x = concatenate([cnn_out, fc_out, rnn_out])
 

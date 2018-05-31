@@ -125,7 +125,8 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1)
+                    n_classes=100, lr=0.001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
+                        numeric_only=args.numeric_only)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
@@ -142,7 +143,7 @@ def train(args):
 
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     bins = util.get_bins(prices, num=config.n_classes)
-    train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer)
+    train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer, args.overfit)
 
 '''
 def sample_params():
@@ -172,9 +173,13 @@ def optimize_params(word_index, embedding_matrix, n_trials=1000):
         train_model(model, config, numeric_data, text_data, ) '''
 
 
-def train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer):
+def train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer, overfit):
     train_img_files = os.listdir('imgs/')
     val_img_files = os.listdir('val_imgs/')
+
+    if overfit:
+        train_img_files = train_img_files[:128]
+        val_img_files = val_img_files[:128]
 
     #reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
     #                              patience=4, min_lr=0.00001, cooldown=3)
@@ -293,6 +298,9 @@ if __name__ == '__main__':
     command_parser.add_argument('-tl', action='store', dest='trainable_layers',
                                 help="Set trainable layers params")
     command_parser.add_argument('-i', '--img_only', action='store_true', default=False, help="Only use img input")
+    command_parser.add_argument('-num', '--numeric_only', action='store_true', default=False, help="Only use numeric input")
+    command_parser.add_argument('-o', '--overfit', action='store_true', default=False, help="Try to overfit on small dataset")
+
 
     command_parser.set_defaults(func=train)
 
