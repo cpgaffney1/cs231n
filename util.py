@@ -241,9 +241,7 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
     img_data_batch, numeric_data_batch, descriptions_batch, addresses_batch = \
         preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size, replace=False),
                                          text_data, numeric_data, desired_shape=img_shape, verbose=verbose, mode=mode)
-    '''img = Image.fromarray(img_data_batch[0], 'RGB')
-    img.show()'''
-    img_data_batch = img_data_batch.astype(np.float32)
+    #img_data_batch = img_data_batch.astype(np.float32)
     img_data_batch = preprocess_input(img_data_batch)
     y_batch, numeric_data_batch = remove_price_array_from_numeric_data(numeric_data_batch)
     '''print(y_batch[0])
@@ -258,17 +256,15 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         x, y = load_data_batch(img_files, numeric_data, text_data, bins,
                               img_shape=img_shape, verbose=verbose, batch_size=batch_size, mode=mode)
         imgs = x[1]
-        datagen = ImageDataGenerator(
+        '''datagen = ImageDataGenerator(
             rotation_range=20,
             horizontal_flip=True,
             width_shift_range=0.2,
             height_shift_range=0.2,
-            shear_range=0.2
         )
         datagen.fit(imgs)
         for imgs, y in datagen.flow(imgs, y, batch_size=batch_size):
-            break
-
+            break'''
         sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))
         sequences = pad_sequences(sequences, maxlen=maxlen)
         yield [x[0], imgs, sequences], y
