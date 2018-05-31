@@ -81,7 +81,7 @@ def buckets(x, bins):
     return y
 
 def get_bins(prices, num=100):
-    bins = np.geomspace(10000, 10e6, num=num)
+    bins = np.geomspace(0, 10e6, num=num)
     return bins
 
 
@@ -245,7 +245,7 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
     #img_data_batch = img_data_batch.astype(np.float32)
     #img_data_batch = preprocess_input(img_data_batch)
     y_batch, numeric_data_batch = remove_price_array_from_numeric_data(numeric_data_batch)
-    return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins) - 1
+    return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins)
 
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
               verbose=False, batch_size=32, mode='train', tokenizer=None, maxlen=20,
