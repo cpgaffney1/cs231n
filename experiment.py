@@ -127,7 +127,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
+                    n_classes=30, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
                         numeric_only=args.numeric_only)
         model = build_model(config)
         if args.name is not None:
@@ -146,33 +146,6 @@ def train(args):
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     bins = util.get_bins(prices, num=config.n_classes)
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer, args.overfit)
-
-'''
-def sample_params():
-    lr = np.random.uniform(0.000001, 0.01)
-    n_recurrent_layers = np.random.randint(1, 3)
-    n_numeric_layers = np.random.randint(1, 3)
-    n_convnet_fc_layers = np.random.randint(1, 4)
-    trainable_convnet_layers = np.random.randint(0, 30)
-    imagenet_weights = np.random.randint(0, 1)
-    n_top_hidden_layers = np.random.randint(1, 5)
-    drop_prob = 0.0
-    return lr, n_recurrent_layers, n_numeric_layers, trainable_convnet_layers, imagenet_weights, \
-        n_top_hidden_layers, n_convnet_fc_layers, drop_prob
-
-
-def optimize_params(word_index, embedding_matrix, n_trials=1000):
-    numeric_data, text_data = preprocessing.load_tabular_data()
-    for t in range(n_trials):
-        lr, n_recurrent_layers, n_numeric_layers, trainable_convnet_layers, imagenet_weights, \
-            n_top_hidden_layers, n_convnet_fc_layers, drop_prob = sample_params()
-        config = Config(word_index, embedding_matrix, lr=lr, n_recurrent_layers=n_recurrent_layers,
-                        n_numeric_layers=n_numeric_layers, trainable_convnet_layers=trainable_convnet_layers,
-                        imagenet_weights=imagenet_weights,
-                        n_top_hidden_layers= n_top_hidden_layers, n_convnet_fc_layers=n_convnet_fc_layers,
-                        drop_prob=drop_prob)
-        model = build_model(config)
-        train_model(model, config, numeric_data, text_data, ) '''
 
 
 def train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer, overfit):
@@ -201,7 +174,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                       val_img_files, numeric_data, text_data, bins,
                                       img_shape=config.img_shape, batch_size=config.batch_size,
                                       tokenizer=tokenizer, maxlen=config.max_seq_len, mode='val'
-                                  ), steps_per_epoch=int(len(train_img_files)/2/config.batch_size), validation_steps=int(len(val_img_files)/config.batch_size))
+                                  ), steps_per_epoch=int(len(train_img_files)/8/config.batch_size), validation_steps=int(len(val_img_files)/2/config.batch_size))
 
 
 def evaluate(args):
