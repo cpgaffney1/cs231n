@@ -178,6 +178,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
     val_img_files = os.listdir('val_imgs/')
 
     if overfit:
+        np.random.shuffle(train_img_files)
+        np.random.shuffle(val_img_files)
         train_img_files = train_img_files[:128]
         val_img_files = val_img_files[:128]
 
