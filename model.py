@@ -50,7 +50,7 @@ def build_model(config):
         weights = 'imagenet'
     else:
         weights = None
-    image_model = Xception(include_top=False, weights=weights)
+    image_model = ResNet50(include_top=False, weights=weights)
     #freeze lower layers
 
     cnn_out = image_model.output
