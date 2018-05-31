@@ -77,7 +77,6 @@ def crop(image, shape=(299, 299), random=False):
 
 def buckets(x, bins):
     y = np.digitize(x, bins, right=True)
-    print(y)
     return y
 
 def get_bins(prices, num=100):
