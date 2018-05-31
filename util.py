@@ -80,7 +80,7 @@ def buckets(x, bins):
     return y
 
 def get_bins(prices, num=1000):
-    bins = np.geomspace(10000, max(prices), num=num)
+    bins = np.geomspace(10000, 10e6, num=num)
     return bins
 
 
@@ -244,9 +244,6 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
     #img_data_batch = img_data_batch.astype(np.float32)
     #img_data_batch = preprocess_input(img_data_batch)
     y_batch, numeric_data_batch = remove_price_array_from_numeric_data(numeric_data_batch)
-    '''print(y_batch[0])
-    print(buckets(y_batch, bins)[0])'''
-    #numeric_data_batch = preprocess_numeric_data(numeric_data_batch)
     return [numeric_data_batch, img_data_batch, descriptions_batch], buckets(y_batch, bins)
 
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
@@ -265,6 +262,11 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         datagen.fit(imgs)
         for imgs, y in datagen.flow(imgs, y, batch_size=batch_size):
             break'''
+        im = Image.fromarray(imgs[0], 'RGB')
+        im.show()
+        print(x[0][0])
+        print(y[0])
+        exit()
         sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))
         sequences = pad_sequences(sequences, maxlen=maxlen)
         yield [x[0], imgs, sequences], y
