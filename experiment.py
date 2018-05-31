@@ -116,7 +116,7 @@ def train(args):
     else:
         trainable_convnet_layers = int(args.trainable_layers)
     if args.reg_weight is None:
-        reg_weight = 0.01
+        reg_weight = 0.00
     else:
         reg_weight = float(args.reg_weight)
 
@@ -125,7 +125,7 @@ def train(args):
         model_folder = 'models/' + args.folder + '/'
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
-                    n_classes=100, lr=0.01, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
+                    n_classes=100, lr=0.001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
                         numeric_only=args.numeric_only)
         model = build_model(config)
         if args.name is not None:
