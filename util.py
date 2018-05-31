@@ -262,11 +262,6 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
         datagen.fit(imgs)
         for imgs, y in datagen.flow(imgs, y, batch_size=batch_size):
             break'''
-        im = Image.fromarray(imgs[0], 'RGB')
-        im.show()
-        print(x[0][0])
-        print(y[0])
-        exit()
         sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))
         sequences = pad_sequences(sequences, maxlen=maxlen)
         yield [x[0], imgs, sequences], y
