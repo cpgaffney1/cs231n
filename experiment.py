@@ -244,7 +244,7 @@ def show_saliency(args):
     img_files = os.listdir('imgs/')
     np.random.shuffle(img_files)
     number = 256
-    x, y = util.load_data_batch(img_files[:number], numeric_data, text_data, bins, config.img_shape,
+    x, y = util.load_data_batch(img_files[:number], numeric_data[:number], text_data[:number], bins, config.img_shape,
                                 False, number, 'train')
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
