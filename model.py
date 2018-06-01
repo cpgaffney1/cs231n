@@ -134,3 +134,4 @@ def load_model(model_folder):
         config = None
     return model, config
 
+

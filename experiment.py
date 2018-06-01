@@ -12,6 +12,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import keras.losses as losses
 from keras.preprocessing.sequence import pad_sequences
+import keras
 
 from keras.callbacks import ReduceLROnPlateau, TensorBoard, CSVLogger, ModelCheckpoint
 
@@ -195,6 +196,7 @@ def evaluate(args):
         pred_indices = K.cast(pred_indices, dtype='float32')
         distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
         return main_loss + config.distance_weight * distance_penalty
+    keras.losses.custom_loss = custom_loss
     model, config = load_model(args.name)
     if args.test:
         mode = 'test'
@@ -228,6 +230,8 @@ def show_saliency(args):
         pred_indices = K.cast(pred_indices, dtype='float32')
         distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
         return main_loss + config.distance_weight * distance_penalty
+    keras.losses.custom_loss = custom_loss
+
     model, config = load_model(args.name)
     input_type = util.get_input_type(config)
 
@@ -289,6 +293,9 @@ def pred(args):
         pred_indices = K.cast(pred_indices, dtype='float32')
         distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
         return main_loss + config.distance_weight * distance_penalty
+    keras.losses.custom_loss = custom_loss
+
+
     model, config = load_model(args.name)
     if args.test:
         mode = 'test'
