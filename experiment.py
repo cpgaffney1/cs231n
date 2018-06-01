@@ -215,6 +215,7 @@ def evaluate(args):
 
 def show_saliency(args):
     model, config = load_model(args.name)
+    input_type = util.get_input_type(config)
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
     additional_num_data = np.load('tabular_data/add_num_data.npy')
@@ -229,8 +230,23 @@ def show_saliency(args):
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
     x[2] = sequences
+
+    if input_type == 'full':
+        x = [x[0], x[1], sequences]
+    elif input_type == 'img':
+        x = x[1]
+    elif input_type == 'num':
+        x = x[0]
+    elif input_type == 'rnn':
+        x = sequences
+    else:
+        print('error')
+        exit()
+
     _ = model.predict(x)
     print('Visualizing saliency...')
+
+    folder = 'models/' + args.name + '/'
 
     indices = np.arange(0, x[0].shape[0])
     np.random.shuffle(indices)
@@ -248,7 +264,7 @@ def show_saliency(args):
     saliency = np.absolute(grads).max(axis=-1)
 
     merged = np.concatenate((saliency[i] for i in range(saliency.shape[0])), axis=0)
-    plt.imsave('Graphs/saliency.jpg', merged, cmap=plt.cm.hot)
+    plt.imsave(folder + 'saliency.jpg', merged, cmap=plt.cm.hot)
 
 
 def pred(args):
@@ -289,10 +305,12 @@ def pred(args):
 
     predictions = model.predict(x)
 
+    folder = 'models/' + args.name + '/'
+
     print('Writing confusion matrix...')
     print(np.argmax(predictions, axis=-1).shape)
-    np.savetxt('preds_neural.csv', np.argmax(predictions, axis=-1), delimiter=',')
-    util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes)
+    np.savetxt(folder + 'preds_neural.csv', np.argmax(predictions, axis=-1), delimiter=',')
+    util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, folder)
 
 
 if __name__ == '__main__':

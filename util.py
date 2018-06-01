@@ -295,18 +295,14 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             yield [x[0], imgs], y'''
 
 
-def conf_matrix(y_true, y_false, nbins, suffix=''):
+def conf_matrix(y_true, y_false, nbins, folder, suffix=''):
     # 2D Histogram
     plt.hist2d(y_true, y_false, bins=nbins, cmap=plt.cm.BuGn_r)
     plt.title('Confusion Matrix')
-    if os.path.exists('Graphs/'):
-        plt.savefig('Graphs/Confusion_Matrix' + suffix)
-    else:
-        os.makedirs('Graphs/')
-        plt.savefig('Graphs/Confusion_Matrix' + suffix)
+    plt.savefig(folder + 'conf_mat' + suffix)
 
-def save_saliency_imgs(img, suffix=''):
-    plt.imsave('Graphs/saliency_map' + suffix, img)
+def save_saliency_imgs(img, folder, suffix=''):
+    plt.imsave(folder + 'saliency_map' + suffix, img)
 
 def get_input_type(config):
     input_type = 'full'
