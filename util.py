@@ -18,6 +18,11 @@ from scipy.stats import kde
 
 import keras.backend as K
 
+def fit_to_distribution(empirical_distribution, y_pred):
+    N = len(y_pred)
+    caps = [int(empirical_distribution[i] * N) for i in range(len(empirical_distribution))]
+
+
 
 def shuffle_in_parallel(arr1, arr2):
     assert(len(arr1) == len(arr2))

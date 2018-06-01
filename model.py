@@ -93,9 +93,6 @@ def build_model(config):
     else:
         x = concatenate([cnn_out, fc_out, rnn_out])
 
-    x = Dense(512, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
-    x = Dropout(config.drop_prob)(x)
-    x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
     predictions = Dense(config.n_classes, activation='softmax', name='main_output', kernel_regularizer=regularizers.l2(config.reg_weight))(x)
 
     model = Model(inputs=[numeric_inputs, image_model.input, text_inputs], outputs=predictions)

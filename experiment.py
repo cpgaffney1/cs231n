@@ -109,8 +109,6 @@ def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, re
     print('Test scores')
     print(reg.score(x_test, y_test))
     np.savetxt('train_preds_linear.csv', train_pred, delimiter=',')
-
-
     util.conf_matrix(y_train, train_pred, 100, suffix='_' + 'linear')
 
     util.print_distribution(train_pred, bins, real=y_train)
@@ -173,9 +171,6 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
         train_img_files = train_img_files[:128]
         val_img_files = val_img_files[:128]
 
-    reduce_lr = ReduceLROnPlateau(monitor='loss', factor=0.5,
-                                  patience=3, min_lr=0.0000001, cooldown=3)
-
     tensorboard = TensorBoard(log_dir=model_folder + 'logs/', write_images=True, write_grads=True)
     csvlogger = CSVLogger(model_folder + 'training_log.csv', append=True)
     saver = ModelCheckpoint(model_folder + 'model', monitor='val_sparse_categorical_accuracy', save_best_only=True, mode='max')
@@ -184,7 +179,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
         pickle.dump(config, pickle_file)
     history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
                                                  batch_size=config.batch_size, tokenizer=tokenizer, maxlen=config.max_seq_len),
-                                  epochs=100, callbacks=[tensorboard, csvlogger, saver, reduce_lr],
+                                  epochs=100, callbacks=[tensorboard, csvlogger, saver],
                                   validation_data=util.generator(
                                       val_img_files, numeric_data, text_data, bins,
                                       img_shape=config.img_shape, batch_size=config.batch_size,
@@ -204,17 +199,6 @@ def evaluate(args):
     additional_num_data = np.load('tabular_data/add_num_data.npy')
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
 
-
-    '''if config is None:
-        img_only_model = True
-        word_index, tokenizer = util.tokenize_texts(text_data)
-        embedding_matrix = util.load_embedding_matrix(word_index)
-        config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True,
-                    trainable_convnet_layers=10,
-                    n_classes=100, lr=0.0001, reg_weight=0.01)
-    else:
-        img_only_model = False'''
-
     bins = util.get_bins(prices, num=config.n_classes)
     print('Beginning evaluation...')
     results = model.evaluate_generator(util.generator(
@@ -224,24 +208,26 @@ def evaluate(args):
     )
     print(results)
 
-    train_img_files = os.listdir(mode + '_imgs/')
-    np.random.shuffle(train_img_files)
-    x, y = util.load_data_batch(train_img_files[:256], numeric_data, text_data, bins, config.img_shape,
-                                False, len(img_files), mode)
+
+
+def show_saliency(args):
+    model, config = load_model(args.name)
+
+    numeric_data, text_data, prices = preprocessing.load_tabular_data()
+    additional_num_data = np.load('tabular_data/add_num_data.npy')
+    numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
+    bins = util.get_bins(prices, num=config.n_classes)
+
+    img_files = os.listdir('imgs/')
+    np.random.shuffle(img_files)
+    x, y = util.load_data_batch(img_files[:256], numeric_data, text_data, bins, config.img_shape,
+                                False, len(img_files), 'train')
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
     x[2] = sequences
     predictions = model.predict(x)
-    print('Writing confusion matrix...')
-    print(np.argmax(predictions, axis=-1).shape)
-    np.savetxt('preds_neural.csv', np.argmax(predictions, axis=-1), delimiter=',')
-    np.savetxt('actual.csv', y, delimiter=',')
-    util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_' + mode)
     print('Visualizing saliency...')
-    show_saliency(model, x, y, mode)
 
-
-def show_saliency(model, x, y, mode, img_only_model=False):
     indices = np.arange(0, x[0].shape[0])
     np.random.shuffle(indices)
     indices = indices[:64]
@@ -249,13 +235,8 @@ def show_saliency(model, x, y, mode, img_only_model=False):
     y = y[indices]
 
     label_tensor = K.constant(y)
-    if img_only_model:
-        fn = K.function([model.inputs[0]],
-                        K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]),
-                                    [model.inputs[0]]))
-    else:
-        fn = K.function(model.inputs,
-                        K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]),
+    fn = K.function(model.inputs,
+                K.gradients(losses.sparse_categorical_crossentropy(label_tensor, model.outputs[0]),
                                     model.inputs))
     grads = fn([x])
     grads = grads[0]
@@ -263,7 +244,32 @@ def show_saliency(model, x, y, mode, img_only_model=False):
     saliency = np.absolute(grads).max(axis=-1)
 
     merged = np.concatenate((saliency[i] for i in range(saliency.shape[0])), axis=0)
-    plt.imsave('Graphs/saliency_{}.jpg'.format(mode), merged, cmap=plt.cm.hot)
+    plt.imsave('Graphs/saliency.jpg', merged, cmap=plt.cm.hot)
+
+
+def pred(args):
+    model, config = load_model(args.name)
+
+    numeric_data, text_data, prices = preprocessing.load_tabular_data()
+    additional_num_data = np.load('tabular_data/add_num_data.npy')
+    numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
+    bins = util.get_bins(prices, num=config.n_classes)
+
+    img_files = os.listdir('imgs/')
+    np.random.shuffle(img_files)
+    x, y = util.load_data_batch(img_files[:256], numeric_data, text_data, bins, config.img_shape,
+                                False, len(img_files), 'train')
+    sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
+    sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
+    x[2] = sequences
+    predictions = model.predict(x)
+
+    print('Writing confusion matrix...')
+    print(np.argmax(predictions, axis=-1).shape)
+    np.savetxt('preds_neural.csv', np.argmax(predictions, axis=-1), delimiter=',')
+    np.savetxt('actual.csv', y, delimiter=',')
+    util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_train')
+
 
 '''
 def show_saliency(model, mode):
@@ -309,8 +315,22 @@ if __name__ == '__main__':
     command_parser.add_argument('-t', '--test', action='store_true', default=False, help="Do on test set. default is validation set")
     command_parser.set_defaults(func=evaluate)
 
-    command_parser = subparsers.add_parser('vis', help='evaluate model')
+    command_parser = subparsers.add_parser('vis', help='visualize iages')
     command_parser.set_defaults(func=visualize)
+
+    command_parser = subparsers.add_parser('sal', help='do saliency')
+    command_parser.add_argument('-n', action='store', dest='name',
+                                help="load model with selected name")
+    command_parser.add_argument('-t', '--test', action='store_true', default=False,
+                                help="Do on test set. default is validation set")
+    command_parser.set_defaults(func=show_saliency)
+
+    command_parser = subparsers.add_parser('pred', help='make predictions and save')
+    command_parser.add_argument('-n', action='store', dest='name',
+                                help="load model with selected name")
+    command_parser.add_argument('-t', '--test', action='store_true', default=False,
+                                help="Do on test set. default is validation set")
+    command_parser.set_defaults(func=show_saliency)
 
 
     ARGS = parser.parse_args()
