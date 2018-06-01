@@ -188,6 +188,13 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
 
 
 def evaluate(args):
+    def custom_loss(y_true, y_pred):
+        epsilon = 0.001
+        main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
+        pred_indices = K.argmax(y_pred, axis=-1)
+        pred_indices = K.cast(pred_indices, dtype='float32')
+        distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
+        return main_loss + config.distance_weight * distance_penalty
     model, config = load_model(args.name)
     if args.test:
         mode = 'test'
@@ -214,6 +221,13 @@ def evaluate(args):
 
 
 def show_saliency(args):
+    def custom_loss(y_true, y_pred):
+        epsilon = 0.001
+        main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
+        pred_indices = K.argmax(y_pred, axis=-1)
+        pred_indices = K.cast(pred_indices, dtype='float32')
+        distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
+        return main_loss + config.distance_weight * distance_penalty
     model, config = load_model(args.name)
     input_type = util.get_input_type(config)
 
@@ -268,6 +282,13 @@ def show_saliency(args):
 
 
 def pred(args):
+    def custom_loss(y_true, y_pred):
+        epsilon = 0.001
+        main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
+        pred_indices = K.argmax(y_pred, axis=-1)
+        pred_indices = K.cast(pred_indices, dtype='float32')
+        distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
+        return main_loss + config.distance_weight * distance_penalty
     model, config = load_model(args.name)
     if args.test:
         mode = 'test'
