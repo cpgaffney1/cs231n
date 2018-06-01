@@ -199,7 +199,7 @@ def evaluate(args):
         input_type = 'img'
     elif config.rnn_only:
         input_type = 'rnn'
-    elif  config.num_only:
+    elif  config.numeric_only:
         input_type = 'num'
     else:
         print('error')
