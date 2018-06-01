@@ -102,10 +102,11 @@ def build_model(config):
            image_model.layers[i].trainable = False
 
     def custom_loss(y_true, y_pred):
+        epsilon = 0.001
         main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
         pred_indices = K.argmax(y_pred, axis=-1)
         pred_indices = K.cast(pred_indices, dtype='float32')
-        distance_penalty = K.constant(1.0, dtype='float32') / K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32'))
+        distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
         return main_loss + config.distance_weight * distance_penalty
 
     opt = Adam(lr=config.lr)
