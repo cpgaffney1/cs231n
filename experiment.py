@@ -189,6 +189,14 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
 
 
 def evaluate(args):
+    model, config = load_model(args.name)
+    if args.test:
+        mode = 'test'
+    else:
+        mode = 'val'
+
+    input_type = util.get_input_type(config)
+
     def custom_loss(y_true, y_pred):
         epsilon = 0.001
         main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
@@ -197,13 +205,6 @@ def evaluate(args):
         distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
         return main_loss + config.distance_weight * distance_penalty
     keras.losses.custom_loss = custom_loss
-    model, config = load_model(args.name)
-    if args.test:
-        mode = 'test'
-    else:
-        mode = 'val'
-
-    input_type = util.get_input_type(config)
 
     img_files = os.listdir(mode + '_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
@@ -223,6 +224,9 @@ def evaluate(args):
 
 
 def show_saliency(args):
+    model, config = load_model(args.name)
+    input_type = util.get_input_type(config)
+
     def custom_loss(y_true, y_pred):
         epsilon = 0.001
         main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
@@ -231,9 +235,6 @@ def show_saliency(args):
         distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
         return main_loss + config.distance_weight * distance_penalty
     keras.losses.custom_loss = custom_loss
-
-    model, config = load_model(args.name)
-    input_type = util.get_input_type(config)
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
     additional_num_data = np.load('tabular_data/add_num_data.npy')
@@ -286,6 +287,14 @@ def show_saliency(args):
 
 
 def pred(args):
+    model, config = load_model(args.name)
+    if args.test:
+        mode = 'test'
+    else:
+        mode = 'val'
+
+    input_type = util.get_input_type(config)
+
     def custom_loss(y_true, y_pred):
         epsilon = 0.001
         main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
@@ -294,15 +303,6 @@ def pred(args):
         distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
         return main_loss + config.distance_weight * distance_penalty
     keras.losses.custom_loss = custom_loss
-
-
-    model, config = load_model(args.name)
-    if args.test:
-        mode = 'test'
-    else:
-        mode = 'val'
-
-    input_type = util.get_input_type(config)
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
     additional_num_data = np.load('tabular_data/add_num_data.npy')
