@@ -241,10 +241,11 @@ def show_saliency(args):
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     bins = util.get_bins(prices, num=config.n_classes)
 
+    number = 1024
     img_files = os.listdir('imgs/')
     np.random.shuffle(img_files)
-    number = 256
-    x, y = util.load_data_batch(img_files[:number], numeric_data[:number], text_data[:number], bins, config.img_shape,
+    img_files = img_files[:number]
+    x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                                 False, number, 'train')
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
