@@ -276,13 +276,13 @@ def pred(args):
     x[2] = sequences
 
     if input_type == 'full':
-        yield [x[0], x[1], sequences], y
+        x = [x[0], x[1], sequences]
     elif input_type == 'img':
-        yield x[1], y
+        x = x[1]
     elif input_type == 'num':
-        yield x[0], y
+        x = x[0]
     elif input_type == 'rnn':
-        yield sequences, y
+        x = sequences
     else:
         print('error')
         exit()
