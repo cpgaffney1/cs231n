@@ -325,7 +325,7 @@ if __name__ == '__main__':
                                 help="load model with selected name")
     command_parser.add_argument('-t', '--test', action='store_true', default=False,
                                 help="Do on test set. default is validation set")
-    command_parser.set_defaults(func=show_saliency)
+    command_parser.set_defaults(func=pred)
 
 
     ARGS = parser.parse_args()
