@@ -7,6 +7,7 @@ from keras.optimizers import Adam, SGD
 from keras.layers import Embedding
 import keras.regularizers as regularizers
 import keras.losses as losses
+import keras.backend as K
 
 
 class Config:
@@ -19,7 +20,7 @@ class Config:
     def __init__(self, word_index, embedding_matrix, tokenizer, lr=0.001, n_recurrent_layers=1, n_numeric_layers=3,
                  trainable_convnet_layers=20, imagenet_weights=True, n_top_hidden_layers=1, n_convnet_fc_layers=2,
                  n_classes=100, drop_prob=0.5, reg_weight=0.01, img_only=False, numeric_input_size=2, freeze_cnn=True,
-                 numeric_only=False, rnn_only=False):
+                 numeric_only=False, rnn_only=False, distance_weight=0.001):
         self.word_index = word_index
         self.embedding_matrix = embedding_matrix
         self.vocab_size = len(word_index)
@@ -40,6 +41,7 @@ class Config:
         self.freeze_cnn = freeze_cnn
         self.numeric_only = numeric_only
         self.rnn_only = rnn_only
+        self.distance_weight = distance_weight
 
 def build_model(config):
     img_inputs = Input(shape=config.img_shape, name='img_input')
@@ -101,6 +103,12 @@ def build_model(config):
     if False:#weights is not None and config.freeze_cnn:
         for i in range(len(image_model.layers) - config.trainable_convnet_layers):
            image_model.layers[i].trainable = False
+
+    def custom_loss(y_true, y_pred):
+        main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
+        pred_indices = K.argmax(y_pred, axis=-1)
+        distance_penalty = 1.0 / K.abs(pred_indices - config.n_classes / 2)
+        return main_loss + config.distance_weight * distance_penalty
 
     opt = Adam(lr=config.lr)
     model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
