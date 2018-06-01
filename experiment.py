@@ -225,7 +225,7 @@ def show_saliency(args):
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
     x[2] = sequences
-    predictions = model.predict(x)
+    _ = model.predict(x)
     print('Visualizing saliency...')
 
     indices = np.arange(0, x[0].shape[0])
@@ -257,7 +257,7 @@ def pred(args):
 
     img_files = os.listdir('imgs/')
     np.random.shuffle(img_files)
-    x, y = util.load_data_batch(img_files[:256], numeric_data, text_data, bins, config.img_shape,
+    x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
                                 False, len(img_files), 'train')
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
@@ -267,22 +267,8 @@ def pred(args):
     print('Writing confusion matrix...')
     print(np.argmax(predictions, axis=-1).shape)
     np.savetxt('preds_neural.csv', np.argmax(predictions, axis=-1), delimiter=',')
-    np.savetxt('actual.csv', y, delimiter=',')
-    util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, suffix='_train')
+    util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes)
 
-
-'''
-def show_saliency(model, mode):
-    layer_idx = vis_utils.find_layer_idx(model, 'main_output')
-    input_idx = vis_utils.find_layer_idx(model, 'img_input')
-    input_tensor = model.layers[input_idx]
-    model.layers[layer_idx].activation = activations.linear
-    model = vis_utils.apply_modifications(model)
-    filter_indices = [10, 30, 50, 70, 90]
-    for f_idx in filter_indices:
-        img = visualize_activation(model, layer_idx, filter_indices=f_idx, seed_input=input_tensor)
-        util.save_saliency_imgs(img, suffix='_' + mode + '_{}'.format(f_idx))
-'''
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Trains and tests the model.')

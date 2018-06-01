@@ -108,7 +108,7 @@ def build_model(config):
         return main_loss + config.distance_weight * distance_penalty
 
     opt = Adam(lr=config.lr)
-    model.compile(optimizer=opt, loss=custom_loss, metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
+    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
 
     return model
 
