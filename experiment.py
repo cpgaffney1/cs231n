@@ -223,8 +223,9 @@ def show_saliency(args):
 
     img_files = os.listdir('imgs/')
     np.random.shuffle(img_files)
-    x, y = util.load_data_batch(img_files[:256], numeric_data, text_data, bins, config.img_shape,
-                                False, len(img_files), 'train')
+    number = 256
+    x, y = util.load_data_batch(img_files[:number], numeric_data, text_data, bins, config.img_shape,
+                                False, number, 'train')
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
     x[2] = sequences
@@ -257,6 +258,8 @@ def pred(args):
     else:
         mode = 'val'
 
+    input_type = util.get_input_type(config)
+
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
     additional_num_data = np.load('tabular_data/add_num_data.npy')
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
@@ -271,6 +274,19 @@ def pred(args):
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
     x[2] = sequences
+
+    if input_type == 'full':
+        yield [x[0], x[1], sequences], y
+    elif input_type == 'img':
+        yield x[1], y
+    elif input_type == 'num':
+        yield x[0], y
+    elif input_type == 'rnn':
+        yield sequences, y
+    else:
+        print('error')
+        exit()
+
     predictions = model.predict(x)
 
     print('Writing confusion matrix...')
