@@ -253,12 +253,16 @@ def show_saliency(args):
 
     if input_type == 'full':
         x = [x[0], x[1], sequences]
+        indices = np.arange(0, x[0].shape[0])
     elif input_type == 'img':
         x = x[1]
+        indices = np.arange(0, x.shape[0])
     elif input_type == 'num':
         x = x[0]
+        indices = np.arange(0, x.shape[0])
     elif input_type == 'rnn':
         x = sequences
+        indices = np.arange(0, x.shape[0])
     else:
         print('error')
         exit()
@@ -268,9 +272,6 @@ def show_saliency(args):
 
     folder = 'models/' + args.name + '/'
 
-    indices = np.arange(0, x[0].shape[0])
-    print(x[0].shape[0])
-    print(y.shape[0])
     np.random.shuffle(indices)
     indices = indices[:64]
     x = [x[0][indices], x[1][indices], x[2][indices]]
