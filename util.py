@@ -244,6 +244,8 @@ def remove_price_array_from_numeric_data(num_data):
 
 def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
                     verbose, batch_size, mode):
+    print(len(img_files))
+    print(batch_size)
     img_data_batch, numeric_data_batch, descriptions_batch, addresses_batch = \
         preprocessing.process_data_batch(np.random.choice(img_files, size=batch_size, replace=False),
                                          text_data, numeric_data, desired_shape=img_shape, verbose=verbose, mode=mode)
