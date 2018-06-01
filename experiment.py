@@ -266,7 +266,7 @@ def pred(args):
     np.random.shuffle(img_files)
 
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
-                                False, len(img_files), mode)
+                                True, len(img_files)-1, mode)
 
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
