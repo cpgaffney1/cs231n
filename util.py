@@ -307,3 +307,16 @@ def conf_matrix(y_true, y_false, nbins, suffix=''):
 
 def save_saliency_imgs(img, suffix=''):
     plt.imsave('Graphs/saliency_map' + suffix, img)
+
+def get_input_type(config):
+    input_type = 'full'
+    if config.img_only:
+        input_type = 'img'
+    elif config.rnn_only:
+        input_type = 'rnn'
+    elif config.numeric_only:
+        input_type = 'num'
+    else:
+        print('error')
+        exit()
+    return input_type

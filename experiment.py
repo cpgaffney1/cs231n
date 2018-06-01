@@ -194,16 +194,7 @@ def evaluate(args):
     else:
         mode = 'val'
 
-    input_type = 'full'
-    if config.img_only:
-        input_type = 'img'
-    elif config.rnn_only:
-        input_type = 'rnn'
-    elif  config.numeric_only:
-        input_type = 'num'
-    else:
-        print('error')
-        exit()
+    input_type = util.get_input_type(config)
 
     img_files = os.listdir(mode + '_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
@@ -261,16 +252,22 @@ def show_saliency(args):
 
 def pred(args):
     model, config = load_model(args.name)
+    if args.test:
+        mode = 'test'
+    else:
+        mode = 'val'
 
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
     additional_num_data = np.load('tabular_data/add_num_data.npy')
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     bins = util.get_bins(prices, num=config.n_classes)
 
-    img_files = os.listdir('imgs/')
+    img_files = os.listdir(mode + '_imgs/')
     np.random.shuffle(img_files)
+
     x, y = util.load_data_batch(img_files, numeric_data, text_data, bins, config.img_shape,
-                                False, len(img_files), 'train')
+                                False, len(img_files), mode)
+
     sequences = np.asarray(config.tokenizer.texts_to_matrix(x[2]))
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
     x[2] = sequences
