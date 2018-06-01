@@ -268,6 +268,8 @@ def show_saliency(args):
     folder = 'models/' + args.name + '/'
 
     indices = np.arange(0, x[0].shape[0])
+    print(x[0].shape[0])
+    print(y.shape[0])
     np.random.shuffle(indices)
     indices = indices[:64]
     x = [x[0][indices], x[1][indices], x[2][indices]]
