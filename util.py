@@ -254,10 +254,11 @@ def load_data_batch(img_files, numeric_data, text_data, bins, img_shape,
 
 def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
               verbose=False, batch_size=32, mode='train', tokenizer=None, maxlen=20,
-              ):
+              input_type='full', eval=False):
     while True:
         x, y = load_data_batch(img_files, numeric_data, text_data, bins,
-                              img_shape=img_shape, verbose=verbose, batch_size=batch_size, mode=mode)
+                              img_shape=img_shape, verbose=verbose, batch_size=batch_size,
+                               mode=mode)
         imgs = x[1]
         '''datagen = ImageDataGenerator(
             rotation_range=20,
@@ -270,7 +271,20 @@ def generator(img_files, numeric_data, text_data, bins, img_shape=(299,299,3),
             break'''
         sequences = np.asarray(tokenizer.texts_to_matrix(x[2]))
         sequences = pad_sequences(sequences, maxlen=maxlen)
-        yield [x[0], imgs, sequences], y
+        if eval:
+            if input_type == 'full':
+                yield [x[0], imgs, sequences], y
+            elif input_type == 'img':
+                yield imgs, y
+            elif input_type == 'num':
+                yield x[0], y
+            elif input_type == 'rnn':
+                yield sequences, y
+            else:
+                print('error')
+                exit()
+        else:
+            yield [x[0], imgs, sequences], y
         '''if img_only:
             yield imgs, y
         elif tokenizer is not None:

@@ -194,6 +194,17 @@ def evaluate(args):
     else:
         mode = 'val'
 
+    input_type = 'full'
+    if config.img_only:
+        input_type = 'img'
+    elif config.rnn_only:
+        input_type = 'rnn'
+    elif  config.num_only:
+        input_type = 'num'
+    else:
+        print('error')
+        exit()
+
     img_files = os.listdir(mode + '_imgs/')
     numeric_data, text_data, prices = preprocessing.load_tabular_data()
     additional_num_data = np.load('tabular_data/add_num_data.npy')
@@ -204,7 +215,8 @@ def evaluate(args):
     results = model.evaluate_generator(util.generator(
         img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
         batch_size=config.batch_size, mode=mode,
-        tokenizer=config.tokenizer, maxlen=config.max_seq_len), steps=int(len(img_files)/config.batch_size)
+        tokenizer=config.tokenizer, maxlen=config.max_seq_len,
+        input_type=input_type, eval=True), steps=int(len(img_files)/config.batch_size)
     )
     print(results)
 
