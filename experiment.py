@@ -289,7 +289,7 @@ def show_saliency(args):
 
     saliency = np.absolute(grads).max(axis=-1)
 
-    merged = np.concatenate((saliency[i] for i in range(saliency.shape[0])), axis=0)
+    merged = np.concatenate([saliency[i] for i in range(saliency.shape[0])], axis=0)
     plt.imsave(folder + 'saliency.jpg', merged, cmap=plt.cm.hot)
 
 
