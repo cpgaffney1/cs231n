@@ -275,9 +275,11 @@ def show_saliency(args):
     np.random.shuffle(indices)
     indices = indices[:64]
     if input_type == 'full':
+        imgs = x[1][indices]
         x = [x[0][indices], x[1][indices], x[2][indices]]
     else:
         x = x[indices]
+        imgs = x
     y = y[indices]
 
     label_tensor = K.constant(y)
@@ -289,8 +291,11 @@ def show_saliency(args):
 
     saliency = np.absolute(grads).max(axis=-1)
 
-    merged = np.concatenate([saliency[i] for i in range(saliency.shape[0])], axis=0)
-    plt.imsave(folder + 'saliency.jpg', merged, cmap=plt.cm.hot)
+    merged_sal = np.concatenate([saliency[i] for i in range(5)], axis=0)
+    merged_real = np.concatenate([imgs[i] for i in range(5)], axis=0)
+
+    plt.imsave(folder + 'saliency.jpg', merged_sal, cmap=plt.cm.hot)
+    plt.imsave(folder + 'saliency_real.jpg', merged_real, cmap=plt.cm.hot)
 
 
 def pred(args):
