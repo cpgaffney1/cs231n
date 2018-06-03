@@ -8,6 +8,7 @@ from keras.layers import Embedding
 import keras.regularizers as regularizers
 import keras.losses as losses
 import keras.backend as K
+from keras.models import load_model as load_keras_model
 
 
 class Config:
@@ -123,15 +124,29 @@ def write_model(model, config, best_val_loss, model_folder):
         pickle.dump(config, pickle_file)
 
 
-from keras.models import load_model as load_keras_model
-def load_model(model_folder):
-    path = 'models/' + model_folder + '/'
-    model = load_keras_model(path + 'model')
+def load_config(folder):
+    '''
+    Loads config object from folder and prints warning in case of failure
+    :param folder: path to load from, including terminal slash
+    :return: config object
+    '''
     try:
-        with open(path + 'config', 'rb') as pickle_file:
+        with open(folder + 'config', 'rb') as pickle_file:
             config = pickle.load(pickle_file)
     except:
         config = None
+        print('Warning: failed to load config')
+    return config
+
+def load_model(name):
+    '''
+    Loads saved model and config object
+    :param name: Name of model saved from a previous training run
+    :return: keras model object and config object
+    '''
+    path = 'models/' + name + '/'
+    model = load_keras_model(path + 'model')
+    config = load_config(path)
     return model, config
 
 

@@ -159,6 +159,10 @@ def train(args):
 
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     bins = util.get_bins(prices, num=config.n_classes)
+    binned_prices = util.buckets(prices, bins)
+    class_weights = 1.0 / (np.bincount(binned_prices) / len(binned_prices))
+    print(class_weights)
+    exit()
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer, args.overfit)
 
 
@@ -178,6 +182,8 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
 
     with open(model_folder + 'config', 'wb') as pickle_file:
         pickle.dump(config, pickle_file)
+
+
     history = model.fit_generator(util.generator(train_img_files, numeric_data, text_data, bins, img_shape=config.img_shape,
                                                  batch_size=config.batch_size, tokenizer=tokenizer, maxlen=config.max_seq_len),
                                   epochs=100, callbacks=[tensorboard, csvlogger, saver],
