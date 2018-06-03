@@ -318,6 +318,5 @@ def get_input_type(config):
     elif config.numeric_only:
         input_type = 'num'
     else:
-        print('error')
-        exit()
+        pass
     return input_type

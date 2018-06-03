@@ -397,8 +397,6 @@ if __name__ == '__main__':
     command_parser = subparsers.add_parser('sal', help='do saliency')
     command_parser.add_argument('-n', action='store', dest='name',
                                 help="load model with selected name")
-    command_parser.add_argument('-t', '--test', action='store_true', default=False,
-                                help="Do on test set. default is validation set")
     command_parser.set_defaults(func=show_saliency)
 
     command_parser = subparsers.add_parser('pred', help='make predictions and save')
