@@ -24,7 +24,8 @@ def fit_to_distribution(empirical_distribution, y_pred):
     y_pred = y_pred[np.argsort(np.max(y_pred, axis=1))]
     n_assigned = 0
     while n_assigned < N:
-        pass
+        label = np.argmax(y_pred[0])
+
 
 
 
