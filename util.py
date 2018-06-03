@@ -22,9 +22,9 @@ def fit_to_distribution(empirical_distribution, y_pred):
     N = len(y_pred)
     caps = [int(empirical_distribution[i] * N + 1) for i in range(len(empirical_distribution))]
     y_pred = y_pred[np.argsort(np.max(y_pred, axis=1))]
-    y_pred_list = [y_pred[i] for i in range(N)]
     n_assigned = 0
     while n_assigned < N:
+        pass
 
 
 
