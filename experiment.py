@@ -163,7 +163,8 @@ def train(args):
     print(bins)
     binned_prices = util.buckets(prices, bins)
     np.savetxt('binned_prices.csv', binned_prices, delimiter=',')
-    class_weights = 1.0 / (1.0 * np.bincount(binned_prices) / len(binned_prices))
+    class_weights = None
+    #class_weights = 1.0 / (1.0 * np.bincount(binned_prices) / len(binned_prices))
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer, args.overfit, class_weights)
 
 
@@ -193,8 +194,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                       img_shape=config.img_shape, batch_size=config.batch_size,
                                       tokenizer=tokenizer, maxlen=config.max_seq_len, mode='val'
                                   ), steps_per_epoch=int(len(train_img_files)/8/config.batch_size),
-                                  validation_steps=int(len(val_img_files)/2/config.batch_size),
-                                  class_weight=class_weights)
+                                  validation_steps=int(len(val_img_files)/2/config.batch_size))
 
 
 def evaluate(args):
