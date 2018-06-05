@@ -336,10 +336,13 @@ def pred(args):
     sequences = pad_sequences(sequences, maxlen=config.max_seq_len)
     x[2] = sequences
 
+    imgs = None
     if input_type == 'full':
         x = [x[0], x[1], sequences]
+        imgs = x[1]
     elif input_type == 'img':
         x = x[1]
+        imgs = x
     elif input_type == 'num':
         x = x[0]
     elif input_type == 'rnn':
@@ -352,10 +355,20 @@ def pred(args):
 
     folder = 'models/' + args.name + '/'
 
+    pred_indices = np.argmax(predictions, axis=-1)
+
     print('Writing confusion matrix...')
     print(np.argmax(predictions, axis=-1).shape)
-    np.savetxt(folder + 'preds_neural.csv', np.argmax(predictions, axis=-1), delimiter=',')
-    util.conf_matrix(y, np.argmax(predictions, axis=-1), config.n_classes, folder)
+    np.savetxt(folder + 'preds_neural.csv', pred_indices, delimiter=',')
+    util.conf_matrix(y, pred_indices, config.n_classes, folder)
+
+    if imgs is not None:
+        dif = np.abs(y - pred_indices)
+        max_indices = dif.argsort()[-10:][::-1]
+        error_imgs = imgs[max_indices]
+        print(dif[max_indices])
+        merged = np.concatenate([error_imgs[i] for i in range(5)], axis=0)
+        plt.imsave(folder + 'error_imgs.jpg', merged)
 
 
 if __name__ == '__main__':
