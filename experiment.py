@@ -76,7 +76,7 @@ def visualize(args):
 def baseline(args):
     n_classes = 50
     _, _, prices = preprocessing.load_tabular_data()
-    bins = util.get_bins(prices, num=n_classes)
+    bins = util.uniform_buckets(prices, n_classes)
     x_train, y_train, x_dev, y_dev, x_test, y_test = util.load_for_lin_reg()
 
     y_train = util.buckets(y_train, bins)
