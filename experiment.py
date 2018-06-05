@@ -363,11 +363,13 @@ def pred(args):
     util.conf_matrix(y, pred_indices, config.n_classes, folder)
 
     if imgs is not None:
-        dif = np.abs(y - pred_indices)
-        max_indices = dif.argsort()[-10:][::-1]
+        num = 10
+        dif = y - pred_indices
+        dif_abs = np.abs(dif)
+        max_indices = dif_abs.argsort()[-num:][::-1]
         error_imgs = imgs[max_indices]
         print(dif[max_indices])
-        merged = np.concatenate([error_imgs[i] for i in range(5)], axis=0)
+        merged = np.concatenate([error_imgs[i] for i in range(num)], axis=0)
         plt.imsave(folder + 'error_imgs.jpg', merged)
 
 
