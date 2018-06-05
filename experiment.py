@@ -158,8 +158,11 @@ def train(args):
                 model_folder = ''
 
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
-    bins = util.get_bins(prices, num=config.n_classes)
+    #bins = util.get_bins(prices, num=config.n_classes)
+    bins = util.uniform_buckets(prices, config.n_classes)
+    print(bins)
     binned_prices = util.buckets(prices, bins)
+    np.savetxt('binned_prices.csv', binned_prices, delimiter=',')
     class_weights = 1.0 / (1.0 * np.bincount(binned_prices) / len(binned_prices))
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer, args.overfit, class_weights)
 

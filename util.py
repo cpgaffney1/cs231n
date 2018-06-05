@@ -18,6 +18,16 @@ from scipy.stats import kde
 
 import keras.backend as K
 
+def uniform_buckets(prices, n_buckets):
+    prices = sorted(prices)
+    bucket_width = int(len(prices) / n_buckets)
+    bins = [prices[bucket_width * (i + 1)] for i in np.arange(n_buckets)]
+    bins[-1] = prices[-1]
+    print(bins)
+    return bins
+
+
+
 def fit_to_distribution(empirical_distribution, y_pred):
     N = len(y_pred)
     caps = [int(empirical_distribution[i] * N + 1) for i in range(len(empirical_distribution))]
