@@ -110,8 +110,15 @@ def build_model(config):
         distance_penalty = K.constant(1.0, dtype='float32') / (K.abs(pred_indices - K.constant(config.n_classes / 2.0, dtype='float32')) + epsilon)
         return main_loss + config.distance_weight * distance_penalty
 
+    def loss_with_var(y_true, y_pred):
+        main_loss = losses.sparse_categorical_crossentropy(y_true, y_pred)
+        pred_indices = K.argmax(y_pred, axis=-1)
+        pred_indices = K.cast(pred_indices, dtype='float32')
+        var_penalty = K.var(pred_indices)
+        return main_loss + config.distance_weight * var_penalty
+
     opt = Adam(lr=config.lr)
-    model.compile(optimizer=opt, loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
+    model.compile(optimizer=opt, loss=loss_with_var, metrics=['sparse_categorical_accuracy', 'sparse_top_k_categorical_accuracy'])
 
     return model
 

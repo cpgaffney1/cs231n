@@ -110,7 +110,7 @@ def logistic_regression(bins, x_train, y_train, x_dev, y_dev, x_test, y_test, re
     print('Test scores')
     print(reg.score(x_test, y_test))
     np.savetxt('train_preds_linear.csv', train_pred, delimiter=',')
-    util.conf_matrix(y_train, train_pred, 100, suffix='_' + 'linear')
+    util.conf_matrix(y_train, train_pred, 100, '', suffix='_' + 'linear')
 
     util.print_distribution(train_pred, bins, real=y_train)
     util.print_distribution(dev_pred, bins, real=y_dev)
@@ -159,12 +159,10 @@ def train(args):
 
     numeric_data = util.preprocess_numeric_data(numeric_data, additional_num_data)
     #bins = util.get_bins(prices, num=config.n_classes)
-    bins = util.uniform_buckets(prices, config.n_classes)
-    print(bins)
+    bins = util.get_bins(prices, config.n_classes)
     binned_prices = util.buckets(prices, bins)
     np.savetxt('binned_prices.csv', binned_prices, delimiter=',')
-    class_weights = None
-    #class_weights = 1.0 / (1.0 * np.bincount(binned_prices) / len(binned_prices))
+    class_weights = 1.0 / (1.0 * np.bincount(binned_prices) / len(binned_prices))
     train_model(model, config, numeric_data, text_data, bins, model_folder, tokenizer, args.overfit, class_weights)
 
 
@@ -194,7 +192,7 @@ def train_model(model, config, numeric_data, text_data, bins, model_folder, toke
                                       img_shape=config.img_shape, batch_size=config.batch_size,
                                       tokenizer=tokenizer, maxlen=config.max_seq_len, mode='val'
                                   ), steps_per_epoch=int(len(train_img_files)/8/config.batch_size),
-                                  validation_steps=int(len(val_img_files)/2/config.batch_size))
+                                  validation_steps=int(len(val_img_files)/2/config.batch_size), class_weight=class_weights)
 
 
 def evaluate(args):
