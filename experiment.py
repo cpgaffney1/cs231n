@@ -142,7 +142,7 @@ def train(args):
     else:
         config = Config(word_index, embedding_matrix, tokenizer, imagenet_weights=True, trainable_convnet_layers=trainable_convnet_layers,
                     n_classes=50, lr=0.0001, reg_weight=reg_weight, img_only=args.img_only, numeric_input_size=additional_num_data.shape[1]+2-1,
-                        numeric_only=args.numeric_only, distance_weight=1000)
+                        numeric_only=args.numeric_only, distance_weight=0.01)
         model = build_model(config)
         if args.name is not None:
             if os.path.exists('models/' + args.name):
